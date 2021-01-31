@@ -1,5 +1,7 @@
 {
   "name": "indoor-potioning-system",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }

@@ -11,6 +11,10 @@ const routes: Routes = [
     redirectTo: 'home',
     pathMatch: 'full'
   },
+  {
+    path: 'matterport-map',
+    loadChildren: () => import('./matterport-map/matterport-map.module').then( m => m.MatterportMapPageModule)
+  },
 ];
 
 @NgModule({
