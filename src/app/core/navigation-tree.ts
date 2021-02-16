@@ -8,7 +8,7 @@ export class NavigationTree {
 
     public nodes: any[] = [];
     public _edges: { start: string, end: string, weight: number }[] = []
-    public edges: any = {};
+    public edges: any = { };
 
     constructor(sweeps: any) {
         this.sweeps = sweeps;
@@ -16,6 +16,7 @@ export class NavigationTree {
     }
 
     createTree() {
+        /** Initialize Dijkstra Algorithm */
         this.dijkstra = new Dijkstra();
 
         for (let k in this.sweeps) {
@@ -26,7 +27,9 @@ export class NavigationTree {
             for (let neighbor of this.sweeps[k].neighbors) {
                 let start = this.sweeps[k].position;
                 let end = this.sweeps[neighbor].position;
-                let distance = Math.sqrt(Math.pow((start.x + end.x), 2) + Math.pow((start.z + end.z), 2))
+                
+                let distance = Math.sqrt(Math.pow((start.x + end.x), 2) + Math.pow((start.z + end.z), 2));
+
                 this._edges.push({ start: k, end: neighbor, weight: distance });
                 if(!this.edges[k]) {
                     this.edges[k] = {};
