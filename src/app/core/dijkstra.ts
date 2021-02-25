@@ -1,23 +1,23 @@
 export class NodeVertex {
-    nameOfVertex: string;
-    weight: number;
+	nameOfVertex: string;
+	weight: number;
 }
 
 export class Vertex {
-    name: string;
-    nodes: NodeVertex[];
-    weight: number;
+	name: string;
+	nodes: NodeVertex[];
+	weight: number;
 
-    constructor(theName: string, theNodes: NodeVertex[], theWeight: number) {
-        this.name = theName;
-        this.nodes = theNodes;
-        this.weight = theWeight;
-    }
+	constructor(theName: string, theNodes: NodeVertex[], theWeight: number) {
+		this.name = theName;
+		this.nodes = theNodes;
+		this.weight = theWeight;
+	}
 }
 
 /**
  * @example
- * 
+ *
  * let dijkstra = new Dijkstra();
  * dijkstra.addVertex(new Vertex("A", [{ nameOfVertex: "C", weight: 3 }, { nameOfVertex: "E", weight: 7 }, { nameOfVertex: "B", weight: 4 }], 1));
  * dijkstra.addVertex(new Vertex("B", [{ nameOfVertex: "A", weight: 4 }, { nameOfVertex: "C", weight: 6 }, { nameOfVertex: "D", weight: 5 }], 1));
@@ -29,67 +29,90 @@ export class Vertex {
  * console.log(dijkstra.findShortestWay("A", "F"));
  */
 export class Dijkstra {
+	vertices: any;
+	constructor() {
+		this.vertices = {};
+	}
 
-    vertices: any;
-    constructor() {
-        this.vertices = {};
-    }
+	addVertex(vertex: Vertex): void {
+		this.vertices[vertex.name] = vertex;
+	}
 
-    addVertex(vertex: Vertex): void {
-        this.vertices[vertex.name] = vertex;
-    }
+	findPointsOfShortestWay(start: string, finish: string, weight: number): string[] {
+		let nextVertex: string = finish;
+		let arrayWithVertex: string[] = [];
+		while (nextVertex !== start) {
+			let minWeigth: number = Number.MAX_VALUE;
+			let minVertex: string = "";
+			for (let i of this.vertices[nextVertex].nodes) {
+				if (i.weight + this.vertices[i.nameOfVertex].weight < minWeigth) {
+					minWeigth = this.vertices[i.nameOfVertex].weight;
+					minVertex = i.nameOfVertex;
+				}
+			}
+			arrayWithVertex.push(minVertex);
+			nextVertex = minVertex;
+		}
+		return arrayWithVertex;
+	}
 
-    findPointsOfShortestWay(start: string, finish: string, weight: number): string[] {
+	findShortestWay(start: string, finish: string): string[] {
+		let nodes: any = {};
+		let visitedVertex: string[] = [];
 
-        let nextVertex: string = finish;
-        let arrayWithVertex: string[] = [];
-        while (nextVertex !== start) {
+		for (let i in this.vertices) {
+			if (this.vertices[i].name === start) {
+				this.vertices[i].weight = 0;
+			} else {
+				this.vertices[i].weight = Number.MAX_VALUE;
+			}
+			nodes[this.vertices[i].name] = this.vertices[i].weight;
+		}
 
-            let minWeigth: number = Number.MAX_VALUE;
-            let minVertex: string = "";
-            for (let i of this.vertices[nextVertex].nodes) {
-                if (i.weight + this.vertices[i.nameOfVertex].weight < minWeigth) {
-                    minWeigth = this.vertices[i.nameOfVertex].weight;
-                    minVertex = i.nameOfVertex;
-                }
-            }
-            arrayWithVertex.push(minVertex);
-            nextVertex = minVertex;
-        }
-        return arrayWithVertex;
-    }
+		while (Object.keys(nodes).length !== 0) {
+			let sortedVisitedByWeight: string[] = Object.keys(nodes).sort((a, b) => this.vertices[a].weight - this.vertices[b].weight);
+			let currentVertex: Vertex = this.vertices[sortedVisitedByWeight[0]];
+			for (let j of currentVertex.nodes) {
+				const calculateWeight: number = currentVertex.weight + j.weight;
+				if (calculateWeight < this.vertices[j.nameOfVertex].weight) {
+					this.vertices[j.nameOfVertex].weight = calculateWeight;
+				}
+			}
+			delete nodes[sortedVisitedByWeight[0]];
+		}
+		const finishWeight: number = this.vertices[finish].weight;
+		let arrayWithVertex: string[] = this.findPointsOfShortestWay(start, finish, finishWeight).reverse();
+		arrayWithVertex.push(finish);
+		return arrayWithVertex;
+	}
 
+	findShortestWayWithWeight(start: string, finish: string): { path: string[]; weight: number } {
+		let nodes: any = {};
+		let visitedVertex: string[] = [];
 
-    findShortestWay(start: string, finish: string): string[] {
+		for (let i in this.vertices) {
+			if (this.vertices[i].name === start) {
+				this.vertices[i].weight = 0;
+			} else {
+				this.vertices[i].weight = Number.MAX_VALUE;
+			}
+			nodes[this.vertices[i].name] = this.vertices[i].weight;
+		}
 
-        let nodes: any = {};
-        let visitedVertex: string[] = [];
-
-        for (let i in this.vertices) {
-            if (this.vertices[i].name === start) {
-                this.vertices[i].weight = 0;
-
-            } else {
-                this.vertices[i].weight = Number.MAX_VALUE;
-            }
-            nodes[this.vertices[i].name] = this.vertices[i].weight;
-        }
-
-        while (Object.keys(nodes).length !== 0) {
-            let sortedVisitedByWeight: string[] = Object.keys(nodes).sort((a, b) => this.vertices[a].weight - this.vertices[b].weight);
-            let currentVertex: Vertex = this.vertices[sortedVisitedByWeight[0]];
-            for (let j of currentVertex.nodes) {
-                const calculateWeight: number = currentVertex.weight + j.weight;
-                if (calculateWeight < this.vertices[j.nameOfVertex].weight) {
-                    this.vertices[j.nameOfVertex].weight = calculateWeight;
-                }
-            }
-            delete nodes[sortedVisitedByWeight[0]];
-        }
-        const finishWeight: number = this.vertices[finish].weight;
-        let arrayWithVertex: string[] = this.findPointsOfShortestWay(start, finish, finishWeight).reverse();
-        arrayWithVertex.push(finish, finishWeight.toString());
-        return arrayWithVertex;
-    }
-
+		while (Object.keys(nodes).length !== 0) {
+			let sortedVisitedByWeight: string[] = Object.keys(nodes).sort((a, b) => this.vertices[a].weight - this.vertices[b].weight);
+			let currentVertex: Vertex = this.vertices[sortedVisitedByWeight[0]];
+			for (let j of currentVertex.nodes) {
+				const calculateWeight: number = currentVertex.weight + j.weight;
+				if (calculateWeight < this.vertices[j.nameOfVertex].weight) {
+					this.vertices[j.nameOfVertex].weight = calculateWeight;
+				}
+			}
+			delete nodes[sortedVisitedByWeight[0]];
+		}
+		const finishWeight: number = this.vertices[finish].weight;
+		let arrayWithVertex: string[] = this.findPointsOfShortestWay(start, finish, finishWeight).reverse();
+		// arrayWithVertex.push(finish, finishWeight.toString());
+		return { path: arrayWithVertex, weight: finishWeight };
+	}
 }

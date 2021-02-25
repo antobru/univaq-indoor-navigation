@@ -1,31 +1,15 @@
 <ion-header>
-  <ion-buttons slot="start">
-    <ion-back-button></ion-back-button>
-  </ion-buttons>
-  <ion-toolbar>
-    <ion-title>matterport-map</ion-title>
-  </ion-toolbar>
+	<ion-buttons slot="start">
+		<ion-back-button></ion-back-button>
+	</ion-buttons>
+	<ion-toolbar>
+		<ion-title>matterport-map</ion-title>
+	</ion-toolbar>
 </ion-header>
 
 <ion-content>
-  
-  <!-- <iframe id="map" src="https://my.matterport.com/show/?m=RkFxWvHxVbw&play=1"></iframe> -->
-  <iframe id="map" src="assets/lib/showcase-bundle/showcase.html?m=RkFxWvHxVbw&play=1" frameborder="0"></iframe>
-  <!-- <iframe id="map" src="https://my.e-building.it/en/shared/18e915aef649dfe0c0f26177cfb73d3c"></iframe> -->
-  <div id="controls" *ngIf="false">
-    <div>
-      Move 
-      <ion-button><</ion-button>
-      <ion-button>^</ion-button>
-      <ion-button>v</ion-button>
-      <ion-button>></ion-button>
-    </div>
-    <div>
-      Rotate 
-      <ion-button><</ion-button>
-      <ion-button>^</ion-button>
-      <ion-button>v</ion-button>
-      <ion-button>></ion-button>
-    </div>
-  </div>
+	<artworks-commands #ac [mattertag_id]="selectedTag" (artworkClick)="mattertagClick($event.mattertag_id)"></artworks-commands>
+	<iframe id="map" src="assets/lib/showcase-bundle/showcase.html?m=RkFxWvHxVbw&play=1&qs=1" frameborder="0"></iframe>
+	<menu [artworks]="artWorks"></menu>
+	<artwork-details #ad [artwork]="selectedArtwork"></artwork-details>
 </ion-content>

@@ -1,0 +1,25 @@
+<div id="details">
+	<ng-container>
+		<div id="media-viewer">
+			<ion-slides *ngIf="artwork" [pager]="true" #mediaSlider>
+				<ion-slide *ngIf="getMediaType(artwork.image) == 'image'">
+					<pinch-zoom>
+						<img [src]="artwork?.image?.url" style="height: 100%;" />
+					</pinch-zoom>
+				</ion-slide>
+				<ion-slide *ngFor="let media of artwork.attachments">
+					<pinch-zoom *ngIf="getMediaType(media) == 'image'">
+						<img [src]="media.url" style="height: 100%;" />
+					</pinch-zoom>
+					<video [src]="media.url" controls *ngIf="getMediaType(media) == 'video'" style="height: 100%">
+						<source [src]="media.url" [type]="media.mime" />
+					</video>
+				</ion-slide>
+			</ion-slides>
+		</div>
+		<div id="info">
+			<h2>{{ artwork?.title }}</h2>
+			<p [innerHTML]="artwork?.description"></p>
+		</div>
+	</ng-container>
+</div>

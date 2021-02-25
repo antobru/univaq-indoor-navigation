@@ -1,0 +1,40 @@
+#details {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 50%;
+    max-height: 75vh;
+    min-height: 10vh;
+    background: rgba($color: #000000, $alpha: .6);
+    transform: translateX(100%);
+    color: var(--ion-color-light);
+    padding: 2em;
+
+    #media-viewer {
+        max-height: 40vh;
+        position: relative;
+    }
+
+    #info {
+        margin-top: 1vh;
+        height: 34vh;
+        overflow: hidden;
+        overflow-y: auto;
+    }
+
+}
+
+ion-icon {
+    position: fixed;
+    font-size: 4em;
+    top: 2em;
+    z-index: 1001;
+}
+
+#prev {
+    left: 0;
+}
+
+#next {
+    right: 0;
+}

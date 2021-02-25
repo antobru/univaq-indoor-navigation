@@ -1,53 +1,58 @@
 import { Dijkstra, NodeVertex, Vertex } from "./dijkstra";
+import { RecursiveDijkstra } from "./recursive-dijkstra";
 
 export class NavigationTree {
+	private dijkstra: Dijkstra;
 
-    private dijkstra: Dijkstra
+	private recursiveDijkstra: RecursiveDijkstra;
 
-    private sweeps: any;
+	private sweeps: any;
 
-    public nodes: any[] = [];
-    public _edges: { start: string, end: string, weight: number }[] = []
-    public edges: any = { };
+	public nodes: any[] = [];
+	public _edges: { start: string; end: string; weight: number }[] = [];
+	public edges: any = {};
 
-    constructor(sweeps: any) {
-        this.sweeps = sweeps;
-        this.createTree();
-    }
+	constructor(sweeps: any) {
+		this.sweeps = sweeps;
+		this.createTree();
+		this.recursiveDijkstra = new RecursiveDijkstra(this.dijkstra);
+	}
 
-    createTree() {
-        /** Initialize Dijkstra Algorithm */
-        this.dijkstra = new Dijkstra();
+	createTree() {
+		/** Initialize Dijkstra Algorithm */
+		this.dijkstra = new Dijkstra();
 
-        for (let k in this.sweeps) {
-            
-            let nodes = [];
+		for (let k in this.sweeps) {
+			let nodes = [];
 
-            this.nodes.push(this.sweeps[k]);
-            for (let neighbor of this.sweeps[k].neighbors) {
-                let start = this.sweeps[k].position;
-                let end = this.sweeps[neighbor].position;
-                
-                let distance = Math.sqrt(Math.pow((start.x + end.x), 2) + Math.pow((start.z + end.z), 2));
+			this.nodes.push(this.sweeps[k]);
+			for (let neighbor of this.sweeps[k].neighbors) {
+				let start = this.sweeps[k].position;
+				let end = this.sweeps[neighbor].position;
 
-                this._edges.push({ start: k, end: neighbor, weight: distance });
-                if(!this.edges[k]) {
-                    this.edges[k] = {};
-                }
-                this.edges[k][neighbor] = distance;
+				let distance = Math.sqrt(Math.pow(start.x + end.x, 2) + Math.pow(start.z + end.z, 2));
 
-                
-                let nodeVertex = new NodeVertex();
-                nodeVertex.nameOfVertex = neighbor;
-                nodeVertex.weight = distance;
-                nodes.push(nodeVertex)
-            }
+				this._edges.push({ start: k, end: neighbor, weight: distance });
+				if (!this.edges[k]) {
+					this.edges[k] = {};
+				}
+				this.edges[k][neighbor] = distance;
 
-            this.dijkstra.addVertex(new Vertex(k, nodes, 1));
-        }
-    }
+				let nodeVertex = new NodeVertex();
+				nodeVertex.nameOfVertex = neighbor;
+				nodeVertex.weight = distance;
+				nodes.push(nodeVertex);
+			}
 
-    getShortestWay(start: string, end: string) {
-        return this.dijkstra.findShortestWay(start, end);
-    }
+			this.dijkstra.addVertex(new Vertex(k, nodes, 1));
+		}
+	}
+
+	getShortestWay(start: string, end: string) {
+		return this.dijkstra.findShortestWay(start, end);
+	}
+
+	getShortestWayBetweenPoints(start: string, nodes: string[]) {
+		return this.recursiveDijkstra.start(start, nodes);
+	}
 }

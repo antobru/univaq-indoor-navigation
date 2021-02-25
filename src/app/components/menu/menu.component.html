@@ -1,0 +1,20 @@
+<div id="menu">
+	<div [ngStyle]="{ background: menuItemSelected == 'Artworks' ? 'var(--ion-color-primary)' : 'rgba(0, 0, 0, 0.6)' }">
+		<ion-button fill="clear" color="light" size="icon-only" (click)="toggleMenuItem('Artworks')">
+			<ion-icon name="brush"></ion-icon>
+			<ion-icon [name]="menuItemSelected == 'Artworks' ? 'chevron-back' : 'chevron-forward'"></ion-icon>
+		</ion-button>
+		<div id="artwork-list">
+			<artworks-list [arteworks]="artworks" (artworkClick)="artWorkClickFn($event)"></artworks-list>
+		</div>
+	</div>
+	<div [ngStyle]="{ background: menuItemSelected == 'Routes' ? 'var(--ion-color-primary)' : 'rgba(0, 0, 0, 0.6)' }">
+		<ion-button fill="clear" color="light" size="icon-only" (click)="toggleMenuItem('Routes')">
+			<ion-icon name="analytics"></ion-icon>
+			<ion-icon [name]="menuItemSelected == 'Routes' ? 'chevron-back' : 'chevron-forward'"></ion-icon>
+		</ion-button>
+		<div id="routes-list">
+			<routes-list></routes-list>
+		</div>
+	</div>
+</div>

@@ -36,7 +36,14 @@ export class MatterportPath extends SceneComponent {
 	onInit() {
 		const THREE = this.context.three;
 
-		const material = new THREE.LineBasicMaterial({ color: this.inputs.color || Color.NAMES.crimson, linewidth: 10 });
+		const material = new THREE.LineBasicMaterial({ color: this.inputs.color || 0xCFFF04, linewidth: 10 });
+		// const material = new THREE.LineDashedMaterial( {
+		// 	color: 0xffffff,
+		// 	linewidth: 5,
+		// 	scale: 5,
+		// 	dashSize: 3,
+		// 	gapSize: 5,
+		// } );
 		const geometry = new THREE.BufferGeometry().setFromPoints(this.inputs.points);
 		const line = new THREE.Line(geometry, material);
 

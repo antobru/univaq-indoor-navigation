@@ -1,0 +1,37 @@
+ion-searchbar {
+	font-size: 0.9em;
+	.searchbar-input {
+		border: 1px solid var(--ion-color-light);
+	}
+
+	--color: var(--ion-color-light);
+	--icon-color: var(--ion-color-light);
+	--placeholder-color: var(--ion-color-light);
+}
+
+ion-list {
+	border-top: 1px solid var(--ion-color-light);
+	--background: transparent;
+	background: transparent;
+
+	ion-item {
+		--background: transparent;
+		background: transparent;
+
+		--padding-start: 0.5em;
+		--padding-end: 0.5em;
+		--inner-padding-end: 0.5em;
+
+		--color: var(--ion-color-light);
+
+		ion-button {
+			--padding-start: 0.5em;
+			--padding-end: 0.5em;
+		}
+
+		ion-label {
+			padding-left: 0.5em;
+			cursor: pointer;
+		}
+	}
+}

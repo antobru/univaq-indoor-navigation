@@ -1,0 +1,29 @@
+#menu {
+	width: fit-content;
+	position: absolute;
+	z-index: 1001;
+	top: 3em;
+	left: 0;
+
+	> div {
+		background: rgba($color: #000000, $alpha: 0.6);
+		margin-top: 0.5em;
+		position: relative;
+
+		ion-button {
+			--padding-start: 0.5em;
+			--padding-end: 0.5em;
+		}
+
+		#artwork-list,
+		#routes-list {
+			background: rgba(0, 0, 0, 0.6);
+			position: absolute;
+			top: 0;
+			left: 60px;
+			max-height: 40vh;
+			min-width: 300px;
+			transform: translateX(-1000px);
+		}
+	}
+}

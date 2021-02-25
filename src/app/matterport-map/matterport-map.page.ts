@@ -1,13 +1,17 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { NavigationTree } from "../core/navigation-tree";
-import { Path2D as MPPath2D } from "../core/matterport/path-2d";
-import * as THREE from "three";
-import { PlaneRenderer, registerPlaneRenderer } from "../core/matterport/PlaneRenderer";
-import { canvasBorderType, registerCanvasBorder } from "../core/matterport/CanvasBorder";
+import { Remarkable } from "remarkable";
 import { MatterportPath } from "../core/matterport/matterport-path";
 import { Color } from "three";
+import { ArtworksCommandsComponent } from "../components/artworks-commands/artworks-commands.component";
+import { ArtWork } from "../models/artwork.model";
+import { ArtworksService } from "../services/artworks.service";
+import { ArtworkDetailsComponent } from "../components/artwork-details/artwork-details.component";
+import { Global } from "../services/global";
 
 //declare var MP_SDK: any;
+
+const md = new Remarkable();
 
 @Component({
 	selector: "app-matterport-map",
@@ -15,26 +19,41 @@ import { Color } from "three";
 	styleUrls: ["./matterport-map.page.scss"],
 })
 export class MatterportMapPage implements OnInit {
+	@ViewChild("ac") ac: ArtworksCommandsComponent;
+	@ViewChild("ad", { static: false }) ad: ArtworkDetailsComponent;
+
 	public iframe: HTMLElement;
 	public SDK: any;
 	public navigationTree: NavigationTree;
 	public sweeps: any;
-	showcaseSize: { w: any; h: any };
-	cameraPose: any;
+	public selectedTag: string;
+	public tags: any[] = [];
+	public showcaseSize: { w: any; h: any };
+	public cameraPose: any;
+	public artWorks: ArtWork[] = [];
+	public selectedArtwork: ArtWork;
 
-	constructor() {}
+	constructor(private artworksService: ArtworksService) {}
 
-	ngOnInit() {
+	async ngOnInit() {
+		this.artWorks = (await this.artworksService.find({})).map((a) => {
+			if (a.image) {
+				a.image.url = Global.ENDPOINTS.BASE + a.image.url;
+			}
+			for(let media of a.attachments) {
+				media.url = Global.ENDPOINTS.BASE + media.url;
+			}
+			return a;
+		});
 		this.iframe = document.getElementById("map");
 		this.iframe.addEventListener("load", this.showcaseLoader.bind(this), true);
 		window["DRAW_PATH"] = this.drawPath.bind(this);
-		window["TEST"] = this.test.bind(this);
 	}
 
 	async showcaseLoader() {
 		let self = this;
 		// setTimeout(async () => {
-		console.clear();
+		// console.clear();
 		try {
 			let showcase = document.querySelector<HTMLIFrameElement>("#map");
 			self.showcaseSize = {
@@ -58,31 +77,67 @@ export class MatterportMapPage implements OnInit {
 
 			self.SDK.Sweep.data.subscribe({
 				onAdded(index, item, collection) {
-					console.log("sweep added to the collection", index, item, collection);
 					self.sweeps = collection;
 					window["SWEEPS"] = collection;
 				},
 				onRemoved(index, item, collection) {
-					// console.log('sweep removed from the collection', index, item, collection);
 					self.sweeps = collection;
 					window["SWEEPS"] = collection;
 				},
 				onUpdated(index, item, collection) {
-					// console.log('sweep updated in place in the collection', index, item, collection);
 					self.sweeps = collection;
 					window["SWEEPS"] = collection;
 				},
 				onCollectionUpdated(collection) {
-					// console.log('the entire up-to-date collection', collection);
 					self.sweeps = collection;
-					// let sweeps = [];
-					// for(let k in self.sweeps) {
-					//   sweeps.push(self.sweeps[k])
-					// }
 					self.navigationTree = new NavigationTree(collection);
 					window["SWEEPS"] = self.navigationTree;
 				},
 			});
+
+			self.SDK.on("tag.click", (id) => {
+				console.log("TAG CLICKED: ", id);
+				setTimeout(() => {
+					this.mattertagClick(id);
+				}, 600);
+			});
+
+			self.SDK.on("sweep.exit", (ev) => {
+				this.ac.hide(true);
+				this.ad.close(1);
+			});
+
+			self.SDK.Mattertag.data.subscribe({
+				onAdded: function (index, item, collection) {
+					// console.log("Mattertag added to the collection", index, item, collection);
+				},
+				onRemoved: function (index, item, collection) {
+					// console.log("Mattertag removed from the collection", index, item, collection);
+				},
+				onUpdated: function (index, item, collection) {
+					// console.log("Mattertag updated in place in the collection", index, item, collection);
+				},
+			});
+			let _tags = await this.SDK.Mattertag.getData();
+			await this.SDK.Mattertag.remove(_tags.map((t) => t.sid));
+
+			for (let artwork of this.artWorks) {
+				artwork.mattertag_info.label = artwork.title;
+				artwork.description = '<div style="color: white">' + md.render(artwork.description) + "</div>";
+				this.SDK.Mattertag.add(artwork.mattertag_info).then((res) => {
+					artwork.mattertag_id = res[0];
+					// console.clear();
+					// console.log(res);
+					self.SDK.Mattertag.injectHTML(res[0], artwork.description, {
+						size: { w: "100%", h: 50 },
+					});
+					this.SDK.Mattertag.preventAction(res[0], { navigation: true, opening: true });
+				});
+			}
+
+			this.tags = await this.SDK.Mattertag.getData();
+			// console.clear();
+			// console.log(this.tags);
 
 			this.SDK.Mattertag.add({
 				// label: "",
@@ -93,32 +148,22 @@ export class MatterportMapPage implements OnInit {
 				color: { r: 1.0, g: 0.0, b: 0.0 },
 				floorIndex: 0, // optional, if not specified the sdk will provide an estimate of the floor index for the anchor position provided.
 			});
-
-			this.test();
 		} catch (e) {
-			console.clear();
-			console.log("CONNECT ERROR RESULT: ");
-			console.error(e);
+			// console.clear();
+			// console.log("CONNECT ERROR RESULT: ");
+			// console.error(e);
 		}
 		// }, 1000)
 	}
 
-	async test() {
-		try {
-			// await MatterportPath.register(this.SDK);
-
-			// var initial = {
-			// 	visible: true,
-			// 	localPosition: { x: 1, y: 1, z: 1 },
-			// 	localScale: { x: 1, y: 1, z: 1 },
-			//   };
-			// let node = await this.SDK.Scene.createNode();
-			// var xr = node.addComponent(MatterportPath.NAME, initial);
-			let node = await MatterportPath.addNode(this.SDK);
-			node.start();
-		} catch (error) {
-			debugger;
+	mattertagClick(id) {
+		this.selectedTag = id;
+		this.selectedArtwork = this.artWorks.find((a) => a.mattertag_id == id);
+		if (this.selectedArtwork) {
+			this.ad.setArtwork(this.selectedArtwork);
+			this.ad.open();
 		}
+		this.ac.show();
 	}
 
 	async drawPath() {
@@ -126,7 +171,8 @@ export class MatterportMapPage implements OnInit {
 		// await this.SDK.Mattertag.remove(_tags.map((t) => t.sid));
 
 		this.SDK.Mode.moveTo(this.SDK.Mode.Mode.FLOORPLAN);
-		let nodes = this.navigationTree.getShortestWay("da46ac94cf0547488dfeafb6f2feb1d2", "418c8e3476c54359a4434879d2552b64");
+		let nodes = this.navigationTree.getShortestWay("da46ac94cf0547488dfeafb6f2feb1d2", "ba7f7eecc89a4273a2ef6028a2064b1c"); //"418c8e3476c54359a4434879d2552b64");
+		console.log(this.navigationTree.getShortestWayBetweenPoints("da46ac94cf0547488dfeafb6f2feb1d2", ["418c8e3476c54359a4434879d2552b64", "ba7f7eecc89a4273a2ef6028a2064b1c"]));
 
 		let points = nodes
 			.map((n) => this.sweeps[n])
