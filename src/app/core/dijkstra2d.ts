@@ -1,69 +1,62 @@
-class Dijkstra2D {
-	private nodes: string[] = ["a", "b", "c", "d", "e"];
+import { NUMBER_TYPE } from "@angular/compiler/src/output/output_ast";
+
+export class Dijkstra2D {
+	private nodes: string[] = ["s", "a", "b", "c", "d", "e", "f", "h", "g"];
 	private edges: { [key: string]: { [key: string]: number } } = {
-		a: { b: 1, d: 10 },
-		b: { a: 1, c: 1 },
-		c: { b: 1, d: 1 },
-		d: { c: 1, e: 1 },
-		e: { d: 1 },
+		s: { a: 10, b: 6, c: 2 },
+		a: { d: 7, s: 10 },
+		b: { e: 3, s: 6 },
+		c: { e: 5, s: 2 },
+		d: { a: 7, f: 5, g: 6, e: 2 },
+		e: { c: 5, b: 3, d: 2, g: 4, h: 12 },
+		f: { d: 5, g: 3 },
+		h: { e: 12, g: 5 },
+		g: { f: 3, d: 6, e: 4, h: 5 }
 	};
 
 	private Q: Queue = new Queue();
-	private distances: { [key: string]: number[] } = {};
+	private distances: { [key: string]: { weight: number, path: string[] }[] } = {};
+
 	getPath(start: string, end: string, mustVisitNodes: string[]) {
+		debugger;
 		for (let n of this.nodes) {
 			this.distances[n] = [];
-			this.distances[n][0] = Number.MAX_VALUE;
 		}
 
-		console.log("Create Start node");
-		this.Q.push(this.createNode(start, 0, 0));
-		//distanza[nodo][bitmask] = cost
-		this.distances[start][0] = 0;
-		console.log("Set start node: ", start, 0, 0);
+		this.Q.push(this.createNode(start, 0, 0), []);
+		this.distances[start][0] = { weight: 0, path: [] };
+		this.distances[start][0].path.push(start);
 
-		console.log("Start WHILE");
 		while (!this.Q.empty()) {
-			console.log("Execute WHILE...");
-
 			let u = this.Q.getNodeWithLowestCost();
-			console.log("Lowest cost node: ", u);
 
-			if (u.cost != this.distances[u.node][u.bitmask]) {
-				console.log("Cost different! continue... ");
+			if (u.node.cost != this.distances[u.node.labelNode][u.node.bitmask].weight) {
 				continue;
 			}
-			console.log("Get neighbors of " + u.node + ":");
-			for (let v of this.neighbors(u.node)) {
-				console.log("- " + v);
 
-				let newBitmask = u.bitmask;
-				console.log(`-- Set bitmask: `, newBitmask);
-				console.log(`-- mustVisitNodes.indexOf("${v}") > -1 => `, mustVisitNodes.indexOf(v) > -1);
+			for (let v of this.neighbors(u.node.labelNode)) {
+				let newBitmask = u.node.bitmask;
+
 				if (mustVisitNodes.indexOf(v) > -1) {
-					let vid = mustVisitNodes.indexOf(v); //this.mustVisitNodes.getId(v);
-					newBitmask = u.bitmask | (1 << vid);
-					console.log(`-- New bitmask: `, newBitmask);
+					let vid = mustVisitNodes.indexOf(v);
+					newBitmask = u.node.bitmask | (1 << vid);
 				}
-				let newCost = u.cost + this.edgeCost(u.node, v);
-				console.log("-- Calculate new cost: " + newCost);
-				console.log(`-- newCost < this.distances["${v}"][${newBitmask}]: ` + newCost + " < " + (this.distances[v][newBitmask] || 'INFINITY') + " => ", newCost < (this.distances[v][newBitmask] || Number.MAX_VALUE));
-				if (newCost < (this.distances[v][newBitmask] || Number.MAX_VALUE)) {
-					console.log("-- New cost < other distance");
+				let newCost = u.node.cost + this.edgeCost(u.node.labelNode, v);
 
-					this.distances[v][newBitmask] = newCost;
-					this.Q.push(this.createNode(v, newBitmask, newCost));
+
+				if (!this.distances[v][newBitmask])
+					this.distances[v][newBitmask] = { weight: Number.MAX_VALUE, path: [] };
+
+				if (newCost < this.distances[v][newBitmask].weight) {
+					let newPath: string[] = u.path.concat([u.node.labelNode]);
+
+					this.distances[v][newBitmask].weight = newCost;					
+					this.distances[v][newBitmask].path = newPath;
+					this.Q.push(this.createNode(v, newBitmask, newCost), newPath);
 				}
 			}
 		}
-		console.log('')
-		console.log('')
-		console.log('this.distances[end][(1 << (mustVisitNodes.length + 1)) - 1]')
-		console.log(`- this.distances[${end}][(1 << (${mustVisitNodes.length} + 1)) - 1]`)
-		console.log(`-- this.distances[${end}][${(1 << (mustVisitNodes.length + 1))} - 1]`)
-		console.log(`--- this.distances[${end}][${(1 << (mustVisitNodes.length + 1)) - 1}]`)
-		console.log(`---> ${this.distances[end][(1 << (mustVisitNodes.length + 1)) - 1]}`)
-		return this.distances[end][(1 << (mustVisitNodes.length + 1)) - 1];
+		return this.distances[end][(1 << (mustVisitNodes.length)) - 1];
 	}
 
 	edgeCost(start, end) {
@@ -81,40 +74,42 @@ class Dijkstra2D {
 	}
 }
 
-class Queue {
-	data: DijkstraNode[] = [];
+export class Queue {
+	data: { node: DijkstraNode, path: string[] }[] = [];
 
 	empty() {
 		return !this.data.length;
 	}
 
-	push(data: DijkstraNode) {
-		this.data.push(data);
+	push(node: DijkstraNode, path: string[]) {
+		this.data.push({ node, path });
 	}
 
-	getNodeWithLowestCost(): DijkstraNode {
+	getNodeWithLowestCost(): { node: DijkstraNode, path: string[] } {
 		let min: DijkstraNode;
 
+
 		for (let d of this.data) {
-			if (!min || d.cost < min.cost) min = d;
+			if (!min || d.node.cost < min.cost) min = d.node;
 		}
 
-		this.data = this.data.filter((d) => d.node != min.node);
+		let res = this.data.find((d) => d.node.labelNode == min.labelNode);
+		this.data = this.data.filter((d) => d.node.labelNode != min.labelNode);
 
-		return min;
+		return res;
 	}
 }
 
-class DijkstraNode {
-	public node: string;
+export class DijkstraNode {
+	public labelNode: string;
 	public bitmask: number;
 	public cost: number;
 
-	constructor(node, bitmask, cost) {
-		this.node = node;
+	constructor(labelNode, bitmask, cost) {
+		this.labelNode = labelNode;
 		this.bitmask = bitmask;
 		this.cost = cost;
 	}
 }
 
-console.log(new Dijkstra2D().getPath("a", "e", ["d"]));
+
