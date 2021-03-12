@@ -36,15 +36,15 @@ export class MatterportMapPage implements OnInit {
 	constructor(private artworksService: ArtworksService) {}
 
 	async ngOnInit() {
-		this.artWorks = (await this.artworksService.find({})).map((a) => {
-			if (a.image) {
-				a.image.url = Global.ENDPOINTS.BASE + a.image.url;
-			}
-			for(let media of a.attachments) {
-				media.url = Global.ENDPOINTS.BASE + media.url;
-			}
-			return a;
-		});
+		// this.artWorks = (await this.artworksService.find({})).map((a) => {
+		// 	if (a.image) {
+		// 		a.image.url = Global.ENDPOINTS.BASE + a.image.url;
+		// 	}
+		// 	for (let media of a.attachments) {
+		// 		media.url = Global.ENDPOINTS.BASE + media.url;
+		// 	}
+		// 	return a;
+		// });
 		this.iframe = document.getElementById("map");
 		this.iframe.addEventListener("load", this.showcaseLoader.bind(this), true);
 		window["DRAW_PATH"] = this.drawPath.bind(this);
@@ -108,31 +108,36 @@ export class MatterportMapPage implements OnInit {
 			});
 
 			self.SDK.Mattertag.data.subscribe({
-				onAdded: function (index, item, collection) {
-					// console.log("Mattertag added to the collection", index, item, collection);
+				onAdded: (index, item, collection) => {
+					let exclude = `b:0.7647058823529411-g:0.7215686274509804-r:0.6705882352941176`;
+					if (item.label && `b:${item.color.b}-g:${item.color.g}-r:${item.color.r}` != exclude) {
+						this.artWorks.push({ mattertag_id: item.sid, title: item.label } as any);
+					}
+					console.log("Mattertag added to the collection", index, item, collection);
 				},
 				onRemoved: function (index, item, collection) {
 					// console.log("Mattertag removed from the collection", index, item, collection);
 				},
 				onUpdated: function (index, item, collection) {
-					// console.log("Mattertag updated in place in the collection", index, item, collection);
+					console.log("Mattertag updated in place in the collection", index, item, collection);
 				},
 			});
 			let _tags = await this.SDK.Mattertag.getData();
-			await this.SDK.Mattertag.remove(_tags.map((t) => t.sid));
+			console.log(_tags);
+			//await this.SDK.Mattertag.remove(_tags.map((t) => t.sid));
 
 			for (let artwork of this.artWorks) {
 				artwork.mattertag_info.label = artwork.title;
 				artwork.description = '<div style="color: white">' + md.render(artwork.description) + "</div>";
-				this.SDK.Mattertag.add(artwork.mattertag_info).then((res) => {
-					artwork.mattertag_id = res[0];
-					// console.clear();
-					// console.log(res);
-					self.SDK.Mattertag.injectHTML(res[0], artwork.description, {
-						size: { w: "100%", h: 50 },
-					});
-					this.SDK.Mattertag.preventAction(res[0], { navigation: true, opening: true });
-				});
+				// this.SDK.Mattertag.add(artwork.mattertag_info).then((res) => {
+				// 	artwork.mattertag_id = res[0];
+				// 	// console.clear();
+				// 	// console.log(res);
+				// 	self.SDK.Mattertag.injectHTML(res[0], artwork.description, {
+				// 		size: { w: "100%", h: 50 },
+				// 	});
+				// 	this.SDK.Mattertag.preventAction(res[0], { navigation: true, opening: true });
+				// });
 			}
 
 			this.tags = await this.SDK.Mattertag.getData();
@@ -171,8 +176,8 @@ export class MatterportMapPage implements OnInit {
 		// await this.SDK.Mattertag.remove(_tags.map((t) => t.sid));
 
 		this.SDK.Mode.moveTo(this.SDK.Mode.Mode.FLOORPLAN);
-		let nodes = this.navigationTree.getShortestWay("da46ac94cf0547488dfeafb6f2feb1d2", "ba7f7eecc89a4273a2ef6028a2064b1c"); //"418c8e3476c54359a4434879d2552b64");
-		console.log(this.navigationTree.getShortestWayBetweenPoints("da46ac94cf0547488dfeafb6f2feb1d2", ["418c8e3476c54359a4434879d2552b64", "ba7f7eecc89a4273a2ef6028a2064b1c"]));
+		let nodes = this.navigationTree.getShortestWay("da46ac94cf0547488dfeafb6f2feb1d2", "418c8e3476c54359a4434879d2552b64"); // "ba7f7eecc89a4273a2ef6028a2064b1c");
+		// console.log(this.navigationTree.getShortestWayBetweenPoints("da46ac94cf0547488dfeafb6f2feb1d2", ["418c8e3476c54359a4434879d2552b64", "ba7f7eecc89a4273a2ef6028a2064b1c"]));
 
 		let points = nodes
 			.map((n) => this.sweeps[n])
@@ -181,8 +186,19 @@ export class MatterportMapPage implements OnInit {
 				s.position.y -= 1.5;
 				return s.position;
 			});
-		let node = await MatterportPath.addNode(this.SDK, { points, color: Color.NAMES.white });
-		node.start();
+
+		// for(let i=0; i <0.1; i+=0.003){
+		// 	let _points = JSON.parse(JSON.stringify(points));
+		// 	_points.map(p => {
+		// 		p.z +=i;
+		// 		p.x +=i;
+		// 		return p;
+		// 	} )
+		// 	let node = await MatterportPath.addNode(this.SDK, { points: _points, color: Color.NAMES.white });
+		// 	node.start();
+		// }
+
+		await MatterportPath.addNode(this.SDK, { points, stroke: 0.1, color: Color.NAMES.white });
 
 		// for (let i = 0; i < nodes.length; i++) {
 		// 	let node = nodes[i];

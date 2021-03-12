@@ -9,23 +9,25 @@ import { ArtworksService } from "../../services/artworks.service";
 })
 export class ArtworksListComponent implements OnInit {
 	@Input("arteworks") arteworks: ArtWork[] = [];
-  @Output("artworkClick") artworkClick: EventEmitter<any> = new EventEmitter<any>();
+	public _artworks: ArtWork[] = [];
+	@Output("artworkClick") artworkClick: EventEmitter<any> = new EventEmitter<any>();
 	public searchTerm: string;
 
 	constructor(private artworksService: ArtworksService) {}
 
 	async ngOnInit() {
 		// this.arteworks = await this.artworksService.find({});
+		this._artworks = this.arteworks;
 	}
 
 	async search() {
 		// this.arteworks = await this.artworksService.find({});
-		this.arteworks = this.arteworks.filter((a) => a.title.indexOf(this.searchTerm || ""));
+		this._artworks = this.arteworks.filter((a) => a.title.indexOf(this.searchTerm || ""));
 	}
 
 	gotoTag(artwork: ArtWork) {
 		let SDK = window["MATTERPORT_SDK"];
 		SDK.Mattertag.navigateToTag(artwork.mattertag_id, SDK.Mattertag.Transition.FLY);
-    this.artworkClick.emit(artwork);
+		this.artworkClick.emit(artwork);
 	}
 }

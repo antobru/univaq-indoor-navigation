@@ -13,6 +13,10 @@ ion-list {
 	border-top: 1px solid var(--ion-color-light);
 	--background: transparent;
 	background: transparent;
+	max-height: 70vh;
+    min-height: 30vh;
+    overflow: hidden;
+    overflow-y: auto;
 
 	ion-item {
 		--background: transparent;

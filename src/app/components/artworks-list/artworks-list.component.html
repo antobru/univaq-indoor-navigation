@@ -1,6 +1,6 @@
 <ion-searchbar mode="ios" [(ngModel)]="searchTerm" [debounce]="400" (ngModelChange)="search()"></ion-searchbar>
 <ion-list>
-	<ion-item *ngFor="let artwork of arteworks">
+	<ion-item *ngFor="let artwork of _artworks">
 		<ion-button size="icon-only" fill="clear" color="light">
 			<ion-icon name="pin"></ion-icon>
 		</ion-button>

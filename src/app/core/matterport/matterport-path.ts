@@ -4,7 +4,7 @@ import { ComponentInteractionType, SceneComponent } from "./SceneComponent";
 type Inputs = {
 	points: Vector3[];
 	color?: string | number | Color;
-    linewidth?: number;
+	linewidth?: number;
 };
 
 export class MatterportPath extends SceneComponent {
@@ -15,14 +15,25 @@ export class MatterportPath extends SceneComponent {
 
 	static async addNode(sdk, inputs = null) {
 		await MatterportPath.register(sdk);
-		let node = await sdk.Scene.createNode();
-		var xr = node.addComponent(MatterportPath.NAME, inputs);
-		return node;
+		for (let i=0; i < (inputs.stroke || 0.1); i+=0.003) {
+			let _points = JSON.parse(JSON.stringify(inputs.points));
+			_points.map(p => {
+				p.z +=i;
+				p.x +=i;
+				return p;
+			} )
+			let node = await sdk.Scene.createNode();
+			var xr = node.addComponent(MatterportPath.NAME, { points: _points, color: inputs.color });
+			node.start();
+		}
+		// let node = await sdk.Scene.createNode();
+		// var xr = node.addComponent(MatterportPath.NAME, inputs);
+		// return node;
 	}
 
 	inputs: Inputs = {
 		points: [],
-        linewidth: 100
+		linewidth: 100,
 	};
 
 	events = {
@@ -35,18 +46,9 @@ export class MatterportPath extends SceneComponent {
 
 	onInit() {
 		const THREE = this.context.three;
-
-		const material = new THREE.LineBasicMaterial({ color: this.inputs.color || 0xCFFF04, linewidth: 10 });
-		// const material = new THREE.LineDashedMaterial( {
-		// 	color: 0xffffff,
-		// 	linewidth: 5,
-		// 	scale: 5,
-		// 	dashSize: 3,
-		// 	gapSize: 5,
-		// } );
+		const material = new THREE.LineBasicMaterial({ color: this.inputs.color || 0xcfff04, linewidth: 10 });
 		const geometry = new THREE.BufferGeometry().setFromPoints(this.inputs.points);
 		const line = new THREE.Line(geometry, material);
-
 		this.outputs.objectRoot = line;
 		this.outputs.collider = line;
 	}
