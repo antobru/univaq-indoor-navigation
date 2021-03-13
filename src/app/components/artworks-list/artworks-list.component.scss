@@ -1,3 +1,12 @@
+#title {
+	color: var(--ion-color-light);
+	font-weight: bold;
+	padding-top: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	font-size: 1.2em;
+}
+
 ion-searchbar {
 	font-size: 0.9em;
 	.searchbar-input {
@@ -9,14 +18,24 @@ ion-searchbar {
 	--placeholder-color: var(--ion-color-light);
 }
 
-ion-list {
-	border-top: 1px solid var(--ion-color-light);
+#search-bar-filters {
 	--background: transparent;
+	--padding-top: 0;
+	--padding-bottom: 1em;
+	--min-height: auto;
+
+	> ion-button {
+		width: 50%
+	}
+}
+
+ion-list {
+	--background: transparent;
+	border-top: 1px solid var(--ion-color-light);
 	background: transparent;
-	max-height: 70vh;
-    min-height: 30vh;
-    overflow: hidden;
-    overflow-y: auto;
+	max-height: 60vh;
+	overflow: hidden;
+	overflow-y: auto;
 
 	ion-item {
 		--background: transparent;
@@ -38,4 +57,25 @@ ion-list {
 			cursor: pointer;
 		}
 	}
+}
+
+/* width */
+::-webkit-scrollbar {
+	width: 5px;
+	border-radius: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 1);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, .92);;
 }

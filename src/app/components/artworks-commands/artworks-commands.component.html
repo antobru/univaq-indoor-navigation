@@ -1,8 +1,8 @@
-<div id="artwork-commands">
-  <ion-button color="light" shape="round" fill="clear" size="icon-only">
-    <ion-icon name="star"></ion-icon>
+<div id="artwork-commands" >
+  <ion-button color="light" shape="round" fill="clear" size="icon-only" (click)="toogleFavorite()">
+    <ion-icon [name]="artwork?.isFavorite? 'star' : 'star-outline'"></ion-icon>
   </ion-button>
-  <ion-button color="light" shape="round" fill="clear" size="icon-only">
+  <ion-button color="light" shape="round" fill="clear" size="icon-only" (click)="addToRoute()">
     <ion-icon name="pin"></ion-icon>
   </ion-button>
 </div>

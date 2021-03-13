@@ -1,0 +1,39 @@
+<div id="wrapper">
+	<div>
+		<ng-container *ngIf="!newRoute">
+			<div class="ion-padding ion-text-center">
+				<div style="font-size: 1.1em; font-weight: 500; text-transform: uppercase">Aggiungi al percorso</div>
+				<div style="margin-top: 1em; font-size: 0.9em">Scegli a quale percorso aggiungere l'opera</div>
+			</div>
+			<div class="ion-text-center ion-padding">
+				<ion-select placeholder="Seleziona un percorso" [interface]="'popover'" [(ngModel)]="selectedRoute">
+					<ion-select-option *ngFor="let route of routes" [value]="route">{{ route.name }}</ion-select-option>
+				</ion-select>
+			</div>
+			<div class="ion-text-center ion-padding">oppure</div>
+			<div class="ion-text-center ion-padding">
+				<ion-button style="width: 100%" (click)="addRoute()">Crea nuovo percorso</ion-button>
+			</div>
+		</ng-container>
+
+		<ng-container *ngIf="newRoute">
+			<div class="ion-padding ion-text-center">
+				<div style="font-size: 1.1em; font-weight: 500; text-transform: uppercase">Aggiungi l'opera al nuovo percorso</div>
+				<div style="margin-top: 1em; font-size: 0.9em">Dai un nome al percorso, l'opera sarà inserita in questo nuovo percorso</div>
+			</div>
+			<div class="ion-text-center ion-padding">
+				<ion-item lines="none">
+					<ion-label>Nome percorso</ion-label>
+					<ion-input [(ngModel)]="selectedRoute.name"></ion-input>
+				</ion-item>
+			</div>
+			<div class="ion-text-center ion-padding">
+				<ion-button style="width: 100%" (click)="back()">Indietro</ion-button>
+			</div>
+		</ng-container>
+
+		<div class="ion-text-center ion-padding" style="margin-top: 3em">
+			<ion-button color="secondary" style="width: 100%" (click)="save()">Salva</ion-button>
+		</div>
+	</div>
+</div>

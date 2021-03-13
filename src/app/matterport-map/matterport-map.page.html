@@ -1,15 +1,15 @@
-<ion-header>
+<!-- <ion-header>
 	<ion-buttons slot="start">
 		<ion-back-button></ion-back-button>
 	</ion-buttons>
 	<ion-toolbar>
 		<ion-title>matterport-map</ion-title>
 	</ion-toolbar>
-</ion-header>
+</ion-header> -->
 
 <ion-content>
-	<artworks-commands #ac [mattertag_id]="selectedTag" (artworkClick)="mattertagClick($event.mattertag_id)"></artworks-commands>
+	<artworks-commands #ac [mattertag_id]="selectedTag" [artwork]="selectedArtwork" (artworkClick)="mattertagClick($event.mattertag_id)"></artworks-commands>
 	<iframe id="map" src="assets/lib/showcase-bundle/showcase.html?m=RkFxWvHxVbw&play=1&qs=1" frameborder="0"></iframe>
-	<menu [artworks]="artWorks"></menu>
+	<menu [artworks]="artWorks" (artworkClick)="mattertagClick($event.mattertag_id)"></menu>
 	<artwork-details #ad [artwork]="selectedArtwork"></artwork-details>
 </ion-content>

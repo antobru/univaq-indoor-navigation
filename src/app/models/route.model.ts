@@ -3,5 +3,6 @@ import { ArtWork } from "./artwork.model";
 export class Route {
     public id: string;
     public name: string;
-    public arteworks: ArtWork[] = []
+    public artworks: string[] = [];
+    public fk_user?: string;
 }

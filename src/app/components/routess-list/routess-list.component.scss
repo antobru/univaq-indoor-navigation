@@ -1,3 +1,12 @@
+#title {
+	color: var(--ion-color-light);
+	font-weight: bold;
+	padding-top: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	font-size: 1.2em;
+}
+
 ion-searchbar {
     font-size: 0.9em;
     .searchbar-input {
@@ -7,6 +16,17 @@ ion-searchbar {
     --color: var(--ion-color-light);
     --icon-color: var(--ion-color-light);
     --placeholder-color: var(--ion-color-light);
+}
+
+#search-bar-filters {
+	--background: transparent;
+	--padding-top: 0;
+	--padding-bottom: 0;
+	--min-height: auto;
+
+	> ion-button {
+		width: 50%
+	}
 }
 
 ion-list {

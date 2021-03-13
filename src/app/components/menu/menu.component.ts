@@ -12,10 +12,9 @@ import { Route } from "../../models/route.model";
 })
 export class MenuComponent implements OnInit {
 	public menuItemSelected: string;
-	@Input('artworks') artworks: ArtWork[] = [];
-	@Input('routes') routes: Route[] = [];
-  @Output("artworkClick") artworkClick: EventEmitter<any> = new EventEmitter<any>();
-
+	@Input("artworks") artworks: ArtWork[] = [];
+	@Input("routes") routes: Route[] = [];
+	@Output("artworkClick") artworkClick: EventEmitter<any> = new EventEmitter<any>();
 
 	private commands = {
 		Artworks: {
@@ -31,26 +30,25 @@ export class MenuComponent implements OnInit {
 	constructor(private artworksService: ArtworksService, private routesService: RoutesService) {}
 
 	async ngOnInit() {
-    this.routes = await this.routesService.find({});
-  }
+		this.routes = await this.routesService.find({});
+	}
 
 	async toggleMenuItem(item: string) {
-    let duration = 300;
+		let duration = 300;
 		if (this.menuItemSelected == item) {
 			this.commands[item].close(duration);
 			this.menuItemSelected = null;
 			return;
 		}
 		if (this.menuItemSelected) {
-     // duration /= 2;
-      await this.commands[this.menuItemSelected].close(duration);
-    }
+			await this.commands[this.menuItemSelected].close(duration);
+		}
 		this.menuItemSelected = item;
 		await this.commands[item].open(duration);
 	}
 
 	openArtwors(duration: number = 500) {
-    duration = duration || 500;
+		duration = duration || 500;
 		let element = document.getElementById("artwork-list");
 		let animation = createAnimation();
 		animation.addElement(element);
@@ -60,7 +58,7 @@ export class MenuComponent implements OnInit {
 	}
 
 	closeArtwors(duration: number = 500) {
-    duration = duration || 500;
+		duration = duration || 500;
 		let element = document.getElementById("artwork-list");
 		let animation = createAnimation();
 		animation.addElement(element);
@@ -70,7 +68,7 @@ export class MenuComponent implements OnInit {
 	}
 
 	openRoutes(duration: number = 500) {
-    duration = duration || 500;
+		duration = duration || 500;
 		let element = document.getElementById("routes-list");
 		let animation = createAnimation();
 		animation.addElement(element);
@@ -80,7 +78,7 @@ export class MenuComponent implements OnInit {
 	}
 
 	closeRoutes(duration: number = 500) {
-    duration = duration || 500;
+		duration = duration || 500;
 		let element = document.getElementById("routes-list");
 		let animation = createAnimation();
 		animation.addElement(element);
@@ -89,7 +87,7 @@ export class MenuComponent implements OnInit {
 		return animation.play();
 	}
 
-  artWorkClickFn($event) {
-    this.artworkClick.emit($event)
-  }
+	artWorkClickFn($event) {
+		this.artworkClick.emit($event);
+	}
 }

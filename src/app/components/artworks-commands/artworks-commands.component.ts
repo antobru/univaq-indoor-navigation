@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { createAnimation } from "@ionic/angular";
+import { createAnimation, ModalController } from "@ionic/angular";
+import { CacheDataService } from "src/app/services/cache-data.service";
 import { ArtWork } from "../../models/artwork.model";
+import { AddArtworkInRouteComponent } from "../add-artwork-in-route/add-artwork-in-route.component";
 
 @Component({
 	selector: "artworks-commands",
@@ -11,7 +13,7 @@ export class ArtworksCommandsComponent implements OnInit {
 	@Input("artwork") artwork: ArtWork;
 	@Input("mattertag_id") mattertag_id: string;
 
-	constructor() {}
+	constructor(private modalCtrl: ModalController, private cacheData: CacheDataService) {}
 
 	ngOnInit() {}
 
@@ -33,5 +35,25 @@ export class ArtworksCommandsComponent implements OnInit {
 		animation.fromTo("transform", `translateX(0)`, `translateX(${element.clientWidth}px)`);
 		animation.duration(duration);
 		animation.play();
+	}
+
+	toogleFavorite() {
+		this.artwork.isFavorite = !this.artwork.isFavorite;
+		this.cacheData.toggleFavorite(this.artwork);
+	}
+
+	async addToRoute() {
+		let modal = await this.modalCtrl.create({ 
+			component: AddArtworkInRouteComponent,
+			componentProps: {
+				artwork: this.artwork
+			}
+		 });
+
+		 modal.present();
+
+		 modal.onDidDismiss().then(res => {
+			 
+		 })
 	}
 }

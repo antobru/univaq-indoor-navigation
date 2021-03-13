@@ -6,4 +6,5 @@ export class ArtWork {
     public attachments: any[];
     public mattertag_id: string;
     public mattertag_info: any;
+    public isFavorite?: boolean;
 }

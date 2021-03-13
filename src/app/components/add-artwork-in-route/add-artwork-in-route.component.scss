@@ -1,0 +1,11 @@
+#wrapper {
+    background: black;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    > div {
+        margin: 0 auto;
+        color: var(--ion-color-light);
+    }
+}

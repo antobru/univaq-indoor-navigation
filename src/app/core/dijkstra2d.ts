@@ -1,24 +1,43 @@
-import { NUMBER_TYPE } from "@angular/compiler/src/output/output_ast";
+import { GeometryUtils } from "../utils/geometry.utils";
 
 export class Dijkstra2D {
-	private nodes: string[] = ["s", "a", "b", "c", "d", "e", "f", "h", "g"];
-	private edges: { [key: string]: { [key: string]: number } } = {
-		s: { a: 10, b: 6, c: 2 },
-		a: { d: 7, s: 10 },
-		b: { e: 3, s: 6 },
-		c: { e: 5, s: 2 },
-		d: { a: 7, f: 5, g: 6, e: 2 },
-		e: { c: 5, b: 3, d: 2, g: 4, h: 12 },
-		f: { d: 5, g: 3 },
-		h: { e: 12, g: 5 },
-		g: { f: 3, d: 6, e: 4, h: 5 }
-	};
+	private nodes: string[] = [];
+	// ["s", "a", "b", "c", "d", "e", "f", "h", "g"];
+	private edges: { [key: string]: { [key: string]: number } } = {};
+	// {
+	// 	s: { a: 10, b: 6, c: 2 },
+	// 	a: { d: 7, s: 10 },
+	// 	b: { e: 3, s: 6 },
+	// 	c: { e: 5, s: 2 },
+	// 	d: { a: 7, f: 5, g: 6, e: 2 },
+	// 	e: { c: 5, b: 3, d: 2, g: 4, h: 12 },
+	// 	f: { d: 5, g: 3 },
+	// 	h: { e: 12, g: 5 },
+	// 	g: { f: 3, d: 6, e: 4, h: 5 }
+	// };
 
 	private Q: Queue = new Queue();
-	private distances: { [key: string]: { weight: number, path: string[] }[] } = {};
+	private distances: { [key: string]: { weight: number; path: string[] }[] } = {};
+
+	constructor(sweeps: any) {
+		this.createTree(sweeps);
+	}
+
+	createTree(sweeps: any) {
+		for (let k in sweeps) {
+			this.nodes.push(k);
+			this.edges[k] = {};
+			for (let neighbor of sweeps[k].neighbors) {
+				let start = sweeps[k].position;
+				let end = sweeps[neighbor].position;
+				let distance = GeometryUtils.distaceBetweenTwoPoints({ x: start.x, y: start.z }, { x: end.x, y: end.z });
+				this.edges[k][neighbor] = distance;
+			}
+		}
+	}
 
 	getPath(start: string, end: string, mustVisitNodes: string[]) {
-		debugger;
+		
 		for (let n of this.nodes) {
 			this.distances[n] = [];
 		}
@@ -43,20 +62,19 @@ export class Dijkstra2D {
 				}
 				let newCost = u.node.cost + this.edgeCost(u.node.labelNode, v);
 
-
-				if (!this.distances[v][newBitmask])
-					this.distances[v][newBitmask] = { weight: Number.MAX_VALUE, path: [] };
+				if (!this.distances[v][newBitmask]) this.distances[v][newBitmask] = { weight: Number.MAX_VALUE, path: [] };
 
 				if (newCost < this.distances[v][newBitmask].weight) {
 					let newPath: string[] = u.path.concat([u.node.labelNode]);
 
-					this.distances[v][newBitmask].weight = newCost;					
+					this.distances[v][newBitmask].weight = newCost;
 					this.distances[v][newBitmask].path = newPath;
 					this.Q.push(this.createNode(v, newBitmask, newCost), newPath);
 				}
 			}
 		}
-		return this.distances[end][(1 << (mustVisitNodes.length)) - 1];
+		this.distances[end][(1 << mustVisitNodes.length) - 1].path.push(end);
+		return this.distances[end][(1 << mustVisitNodes.length) - 1];
 	}
 
 	edgeCost(start, end) {
@@ -75,7 +93,7 @@ export class Dijkstra2D {
 }
 
 export class Queue {
-	data: { node: DijkstraNode, path: string[] }[] = [];
+	data: { node: DijkstraNode; path: string[] }[] = [];
 
 	empty() {
 		return !this.data.length;
@@ -85,9 +103,8 @@ export class Queue {
 		this.data.push({ node, path });
 	}
 
-	getNodeWithLowestCost(): { node: DijkstraNode, path: string[] } {
+	getNodeWithLowestCost(): { node: DijkstraNode; path: string[] } {
 		let min: DijkstraNode;
-
 
 		for (let d of this.data) {
 			if (!min || d.node.cost < min.cost) min = d.node;
@@ -111,5 +128,3 @@ export class DijkstraNode {
 		this.cost = cost;
 	}
 }
-
-

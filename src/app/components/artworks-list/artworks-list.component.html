@@ -1,15 +1,29 @@
+<div id="title">Opere</div>
 <ion-searchbar mode="ios" [(ngModel)]="searchTerm" [debounce]="400" (ngModelChange)="search()"></ion-searchbar>
+<ion-item lines="none" id="search-bar-filters">
+	<ion-button size="small" color="primary" (click)="prefered()">
+		<ion-icon name="checkmark" slot="start" *ngIf="filter.favorites"></ion-icon>
+		Preferiti
+	</ion-button>
+	<ion-button size="small" color="secondary">
+		<ion-icon name="checkmark" slot="start" *ngIf="filter.suggested"></ion-icon>
+		Suggeriti
+	</ion-button>
+</ion-item>
 <ion-list>
 	<ion-item *ngFor="let artwork of _artworks">
-		<ion-button size="icon-only" fill="clear" color="light">
+		<ion-button size="icon-only" fill="clear" color="light" (click)="addToRoute(artwork)">
 			<ion-icon name="pin"></ion-icon>
 		</ion-button>
-		<ion-button size="icon-only" fill="clear" color="light">
-			<ion-icon name="star"></ion-icon>
+		<ion-button size="icon-only" fill="clear" color="light" (click)="toogleFavorite(artwork)">
+			<ion-icon [name]="artwork.isFavorite? 'star' : 'star-outline'"></ion-icon>
 		</ion-button>
 		<ion-label (click)="gotoTag(artwork)">{{ artwork.title }}</ion-label>
 	</ion-item>
 	<ion-item *ngIf="arteworks && !arteworks.length">
 		<ion-label class="ion-text-center"> Nessuna opera trovata </ion-label>
+	</ion-item>
+	<ion-item *ngIf="_artworks && !_artworks.length">
+		<ion-label class="ion-text-center"> Nessun risultato </ion-label>
 	</ion-item>
 </ion-list>

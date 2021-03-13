@@ -8,8 +8,9 @@ import { ArtworksListComponent } from "./artworks-list/artworks-list.component";
 import { FormsModule } from "@angular/forms";
 import { ArtworkDetailsComponent } from "./artwork-details/artwork-details.component";
 import { PinchZoomModule } from "ngx-pinch-zoom";
+import { AddArtworkInRouteComponent } from "./add-artwork-in-route/add-artwork-in-route.component";
 
-const components = [ArtworksCommandsComponent, MenuComponent, RoutessListComponent, ArtworksListComponent, ArtworkDetailsComponent];
+const components = [ArtworksCommandsComponent, MenuComponent, RoutessListComponent, ArtworksListComponent, ArtworkDetailsComponent, AddArtworkInRouteComponent];
 
 @NgModule({
 	declarations: components,
