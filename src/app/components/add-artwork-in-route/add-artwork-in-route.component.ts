@@ -19,6 +19,7 @@ export class AddArtworkInRouteComponent implements OnInit {
   constructor(private cacheData: CacheDataService, private modalCtrl: ModalController) { }
 
   ngOnInit() {
+    this.selectedRoute = this.cacheData.routes.find(r => r.id == sessionStorage.getItem('last_route'))
     this.routes = this.cacheData.routes.filter(r => !!r.fk_user);
   }
 
@@ -34,8 +35,8 @@ export class AddArtworkInRouteComponent implements OnInit {
   }
 
   save() {
-    debugger
     if (this.selectedRoute) {
+      sessionStorage.setItem('last_route', this.selectedRoute.id);
       if (this.newRoute) {
         this.cacheData.addRoute(this.selectedRoute);
         this.modalCtrl.dismiss();

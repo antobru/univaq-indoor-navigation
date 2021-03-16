@@ -1,16 +1,13 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, NgZone, OnInit, ViewChild } from "@angular/core";
 import { NavigationTree } from "../core/navigation-tree";
 import { Remarkable } from "remarkable";
-import { MatterportPath } from "../core/matterport/matterport-path";
-import { Color } from "three";
 import { ArtworksCommandsComponent } from "../components/artworks-commands/artworks-commands.component";
 import { ArtWork } from "../models/artwork.model";
 import { ArtworksService } from "../services/artworks.service";
 import { ArtworkDetailsComponent } from "../components/artwork-details/artwork-details.component";
-import { Global } from "../services/global";
 import { CacheDataService } from "../services/cache-data.service";
-import { Dijkstra2D } from "../core/dijkstra2d";
 import { GeometryUtils } from "../utils/geometry.utils";
+import { Global } from "../services/global";
 
 //declare var MP_SDK: any;
 
@@ -27,6 +24,7 @@ export class MatterportMapPage implements OnInit {
 
 	public iframe: HTMLElement;
 	public SDK: any;
+	public map_mode: string;
 	public navigationTree: NavigationTree;
 	public sweeps: any;
 	public selectedTag: string;
@@ -35,8 +33,9 @@ export class MatterportMapPage implements OnInit {
 	public cameraPose: any;
 	public artWorks: ArtWork[] = [];
 	public selectedArtwork: ArtWork;
+	public route_playing: boolean;
 
-	constructor(private artworksService: ArtworksService, private cacheData: CacheDataService) {}
+	constructor(private artworksService: ArtworksService, private cacheData: CacheDataService, private ngZone: NgZone) {}
 
 	async ngOnInit() {
 		// this.artWorks = (await this.artworksService.find({})).map((a) => {
@@ -48,6 +47,11 @@ export class MatterportMapPage implements OnInit {
 		// 	}
 		// 	return a;
 		// });
+
+		Global.ROUTE_PLAYING.subscribe((res) => {
+			this.route_playing = res;
+		});
+
 		this.artWorks = [];
 		this.iframe = document.getElementById("map");
 		this.iframe.addEventListener("load", this.showcaseLoader.bind(this), true);
@@ -99,6 +103,12 @@ export class MatterportMapPage implements OnInit {
 				this.ad.close(1);
 			});
 
+			self.SDK.on("viewmode.changestart", (oldState, newState) => {
+				console.log("viewmode.changestart", oldState, newState);
+				self.map_mode = newState;
+				self.ngZone.run(() => {});
+			});
+
 			self.SDK.Mattertag.data.subscribe({
 				onAdded(index, item, collection) {
 					let exclude = `b:0.7647058823529411-g:0.7215686274509804-r:0.6705882352941176`;
@@ -118,9 +128,9 @@ export class MatterportMapPage implements OnInit {
 
 			this.tags = await this.SDK.Mattertag.getData();
 			for (let tag of this.tags) {
-				console.log('')
-				console.log(this.tags.length)
-				console.log('')
+				console.log("");
+				console.log(this.tags.length);
+				console.log("");
 				tag.nearestSweep = await this.nearestSweep(tag);
 			}
 			window["__TAGS"] = this.tags;
@@ -149,6 +159,16 @@ export class MatterportMapPage implements OnInit {
 			// 		});
 			// 	}
 			// }, 5000);
+
+			setTimeout(async () => {
+				let tags = await this.SDK.Mattertag.getData();
+
+				for (let t of tags) {
+					self.SDK.Mattertag.preventAction(t.sid, {
+						opening: true,
+					});
+				}
+			}, 2000);
 		} catch (e) {}
 	}
 

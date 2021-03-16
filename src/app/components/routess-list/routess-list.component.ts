@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Dijkstra2D } from "src/app/core/dijkstra2d";
 import { MatterportPath, MatterportPathInstance } from "src/app/core/matterport/matterport-path";
 import { CacheDataService } from "src/app/services/cache-data.service";
+import { Global } from "src/app/services/global";
 import { GeometryUtils } from "src/app/utils/geometry.utils";
 import { Color } from "three";
 import { Route } from "../../models/route.model";
@@ -61,20 +62,22 @@ export class RoutessListComponent implements OnInit {
 			mustVisitSweeps.push(tag.nearestSweep.sweep_id);
 		}
 
-		let result = dijkstra2d.getPath("da46ac94cf0547488dfeafb6f2feb1d2", "05f0334dbfb048adb1161852ca5f41b8", mustVisitSweeps);
-		console.log("Dijkstra2D result: ", result);
+		// TODO: re-enable algorithm
+		// let result = dijkstra2d.getPath("da46ac94cf0547488dfeafb6f2feb1d2", "05f0334dbfb048adb1161852ca5f41b8", mustVisitSweeps);
+		// console.log("Dijkstra2D result: ", result);
 
-		let points = result.path
-			.map((n) => navigationTree.sweeps[n])
-			.filter((s) => !!s)
-			.map((s) => {
-				s.position.y -= 1.5;
-				return s.position;
-			});
+		// let points = result.path
+		// 	.map((n) => navigationTree.sweeps[n])
+		// 	.filter((s) => !!s)
+		// 	.map((s) => {
+		// 		s.position.y -= 1.5;
+		// 		return s.position;
+		// 	});
 
-		this.actualPath = await MatterportPath.addNode(SDK, { points, stroke: 0.1, color: Color.NAMES.white });
+		// this.actualPath = await MatterportPath.addNode(SDK, { points, stroke: 0.1, color: Color.NAMES.white });
+		// this.actualPath.start();
 		this.playing_route = route.id;
-		this.actualPath.start();
+		Global.ROUTE_PLAYING.emit(true);
 	}
 
 	async stop(no_move: boolean = false) {
@@ -89,6 +92,7 @@ export class RoutessListComponent implements OnInit {
 			this.actualPath.stop();
 			this.actualPath = null;
 		}
+		Global.ROUTE_PLAYING.emit(false);
 		return Promise.all(promises);
 	}
 

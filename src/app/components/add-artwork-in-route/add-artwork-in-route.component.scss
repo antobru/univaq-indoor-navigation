@@ -1,5 +1,5 @@
 #wrapper {
-    background: black;
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     height: 100%;
@@ -8,4 +8,8 @@
         margin: 0 auto;
         color: var(--ion-color-light);
     }
+    // ion-item {
+    //     --background: transparent;
+    //     color: white;
+    // }
 }

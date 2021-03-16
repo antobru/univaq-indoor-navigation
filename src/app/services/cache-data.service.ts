@@ -13,10 +13,14 @@ export class CacheDataService {
 	public artworks: ArtWork[] = [];
 	public routes: Route[] = [];
 
+	private defaultRoutes = [{ name: "Il Bronzino", id: "BRONZX", artworks: ["WUbPQjezb1s", "DOmC5VTkpUU", "nieBTbXGUhQ", "s7i6OopsEwC", "MJr0XAXx3dd", "xNFawztkiGi"] }];
+
 	constructor() {
 		this.routes = JSON.parse(this.cache.getItem("routes") || "[]");
 		this.favorites = JSON.parse(this.cache.getItem("favorites") || "[]");
-		this.routes.push(...[{ name: "Il Bronzino", id: "BRONZX", artworks: ["WUbPQjezb1s", "DOmC5VTkpUU", "nieBTbXGUhQ", "s7i6OopsEwC", "MJr0XAXx3dd", "xNFawztkiGi"] }]);
+		if (!this.routes.length) {
+			this.routes.push(...this.defaultRoutes);
+		}
 	}
 
 	addArtwork(artwork: ArtWork) {
