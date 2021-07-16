@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons>
+      <ion-button size="icon-only" (click)="showBeacons = !showBeacons">
+        <!-- {{!options.showBeacons? 'Mostra' : 'Nascondi'}} beacon -->
+        <ion-icon name="bluetooth-outline" [color]="showBeacons? 'success' : 'danger'"></ion-icon>
+      </ion-button>
+      <ion-button size="icon-only" (click)="toggleAreas()">
+        <!-- {{!options.showBeacons? 'Mostra' : 'Nascondi'}} beacon -->
+        <ion-icon name="apps-sharp" [color]="showMapping? 'success' : 'danger'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>geojson-map</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="beaconsService.toggleDetection()">
+        {{beaconsService.isMonitoring? 'Stop' : 'Start'}}
+      </ion-button>
+      <ion-button (click)="startDetection()">
+        {{beaconsService.all? 'All' : 'device' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-card class="floating" *ngIf="showBeacons">
+    <ion-card-content>
+      <ion-list>
+        <ion-list-header>Beacons</ion-list-header>
+        <ion-item *ngFor="let beacon of detectedBeacons">
+          <ion-label>
+            <div>{{beacon.id}}</div>
+            <div><small> Distance: <i>{{beacon.distance}}</i></small></div>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <div id="map">
+    <agm-map *ngIf="options" [latitude]="options.lat" [longitude]="options.lng" [zoom]="options.zoom"
+      [minZoom]="options.minZoom" [maxZoom]="options.maxZoom" [styles]="styles" (mapReady)="mapReadyHandler($event)">
+      <agm-data-layer *ngIf="map" [geoJson]="map"></agm-data-layer>
+      <!-- <agm-marker [latitude]="options.lat" [longitude]="options.lng"></agm-marker> -->
+      <ng-container *ngIf="showBeacons">
+        <agm-marker [latitude]="b.coordinate.lat" [longitude]="b.coordinate.lng" [iconUrl]="'assets/bluetooth.png'"
+          *ngFor="let b of beaconsMapping">
+          <agm-info-window [disableAutoPan]="true">
+            <div><b>id:</b> {{b.id}}</div>
+            <div><b>Lat:</b> {{b.coordinate.lat}}</div>
+            <div><b>Lng:</b> {{b.coordinate.lng}}</div>
+          </agm-info-window>
+        </agm-marker>
+      </ng-container>
+      
+      <agm-marker *ngIf="currentPosition" [latitude]="currentPosition.lat" [longitude]="currentPosition.lng">
+      </agm-marker>
+
+      <agm-polygon [paths]="a.paths" [fillColor]="a.fill" *ngFor="let a of areas" (polyClick)="alertInfo(a)">
+      </agm-polygon>
+    </agm-map>
+  </div>
+</ion-content>

@@ -11,17 +11,18 @@ export class CRUDService<T> {
 
 	find(filter: any, start: number = 0, limit: number = 20, sort: string = null): Promise<T[]> {
 		let params: any = {};
-		if (filter) params._where = qs.stringify(filter);
+		let _where = '';
+		if (filter) _where = qs.stringify(filter);
 		if (start) params._start = "" + (start || 0);
 		if (limit) params._limit = "" + (limit || 20);
 		if (sort) params._sort = "" + (limit || 20);
 
 		return this.http
-			.get<T[]>(`${this.endpoint}`, { params })
+			.get<T[]>(`${this.endpoint}?${_where ? '_where=' + _where : ''}`, { params })
 			.toPromise();
 	}
 
-	findOne(id: string) {
+	findOne(id: any) {
 		return this.http.get<T>(`${this.endpoint}/${id}`).toPromise();
 	}
 
@@ -35,5 +36,9 @@ export class CRUDService<T> {
 
 	delete(id: string) {
 		return this.http.delete<T>(`${this.endpoint}/${id}`).toPromise();
+	}
+
+	getMedia(url: string) {
+		return this.http.get(url).toPromise();
 	}
 }

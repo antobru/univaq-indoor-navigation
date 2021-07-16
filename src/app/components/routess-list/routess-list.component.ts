@@ -57,25 +57,25 @@ export class RoutessListComponent implements OnInit {
 		//let nodes = navigationTree.getShortestWay("da46ac94cf0547488dfeafb6f2feb1d2", "418c8e3476c54359a4434879d2552b64"); // "ba7f7eecc89a4273a2ef6028a2064b1c");
 
 		let mustVisitSweeps = [];
-		for (let id of route.artworks) {
-			let tag = window["__TAGS"].find((t) => t.sid == id);
-			mustVisitSweeps.push(tag.nearestSweep.sweep_id);
-		}
+		// for (let id of route.artworks) {
+		// 	let tag = window["__TAGS"].find((t) => t.sid == id);
+		// 	mustVisitSweeps.push(tag.nearestSweep.sweep_id);
+		// }
 
 		// TODO: re-enable algorithm
-		// let result = dijkstra2d.getPath("da46ac94cf0547488dfeafb6f2feb1d2", "05f0334dbfb048adb1161852ca5f41b8", mustVisitSweeps);
-		// console.log("Dijkstra2D result: ", result);
+		let result = dijkstra2d.getPath("da46ac94cf0547488dfeafb6f2feb1d2", "05f0334dbfb048adb1161852ca5f41b8", mustVisitSweeps);
+		console.log("Dijkstra2D result: ", result);
 
-		// let points = result.path
-		// 	.map((n) => navigationTree.sweeps[n])
-		// 	.filter((s) => !!s)
-		// 	.map((s) => {
-		// 		s.position.y -= 1.5;
-		// 		return s.position;
-		// 	});
+		let points = result.path
+			.map((n) => navigationTree.sweeps[n])
+			.filter((s) => !!s)
+			.map((s) => {
+				s.position.y -= 1.5;
+				return s.position;
+			});
 
-		// this.actualPath = await MatterportPath.addNode(SDK, { points, stroke: 0.1, color: Color.NAMES.white });
-		// this.actualPath.start();
+		this.actualPath = await MatterportPath.addNode(SDK, { points, stroke: 0.1, color: Color.NAMES.white });
+		this.actualPath.start();
 		this.playing_route = route.id;
 		Global.ROUTE_PLAYING.emit(true);
 	}

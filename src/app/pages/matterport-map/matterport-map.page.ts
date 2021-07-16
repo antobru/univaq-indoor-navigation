@@ -1,13 +1,13 @@
 import { Component, NgZone, OnInit, ViewChild } from "@angular/core";
-import { NavigationTree } from "../core/navigation-tree";
+import { NavigationTree } from "../../core/navigation-tree";
 import { Remarkable } from "remarkable";
-import { ArtworksCommandsComponent } from "../components/artworks-commands/artworks-commands.component";
-import { ArtWork } from "../models/artwork.model";
-import { ArtworksService } from "../services/artworks.service";
-import { ArtworkDetailsComponent } from "../components/artwork-details/artwork-details.component";
-import { CacheDataService } from "../services/cache-data.service";
-import { GeometryUtils } from "../utils/geometry.utils";
-import { Global } from "../services/global";
+import { ArtworksCommandsComponent } from "../../components/artworks-commands/artworks-commands.component";
+import { ArtWork } from "../../models/artwork.model";
+import { ArtworksService } from "../../services/artworks.service";
+import { ArtworkDetailsComponent } from "../../components/artwork-details/artwork-details.component";
+import { CacheDataService } from "../../services/cache-data.service";
+import { GeometryUtils } from "../../utils/geometry.utils";
+import { Global } from "../../services/global";
 
 //declare var MP_SDK: any;
 

@@ -8,13 +8,23 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'matterport-map',
+    redirectTo: 'geojson-map',
     pathMatch: 'full'
   },
   {
     path: 'matterport-map',
-    loadChildren: () => import('./matterport-map/matterport-map.module').then( m => m.MatterportMapPageModule)
+    loadChildren: () => import('./pages/matterport-map/matterport-map.module').then( m => m.MatterportMapPageModule)
   },
+  {
+    path: 'artworks',
+    loadChildren: () => import('./pages/artworks/artworks.module').then( m => m.ArtworksPageModule)
+  },
+  {
+    path: 'geojson-map',
+    loadChildren: () => import('./pages/geojson-map/geojson-map.module').then( m => m.GeojsonMapPageModule)
+  },
+
+
 ];
 
 @NgModule({

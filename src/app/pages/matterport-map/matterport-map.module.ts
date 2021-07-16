@@ -7,7 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { MatterportMapPageRoutingModule } from './matterport-map-routing.module';
 
 import { MatterportMapPage } from './matterport-map.page';
-import { ComponentsModule } from '../components/components.module';
+import { ComponentsModule } from '../../components/components.module';
 
 @NgModule({
   imports: [
