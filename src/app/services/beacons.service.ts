@@ -13,7 +13,7 @@ import { Global } from './global';
 export class BeaconsService extends CRUDService<Beacon> {
 
   UUID: string = 'e1f54e02-1e23-44e0-9c3d-512eb56adec8';
-  all: boolean = false;
+  all: boolean = true;
   beaconRegion: BeaconRegion;
   isMonitoring: boolean = false;
 
@@ -69,7 +69,6 @@ export class BeaconsService extends CRUDService<Beacon> {
       );
       delegate.didStartMonitoringForRegion().subscribe(
         data => {
-          debugger
           console.log('didStartMonitoringForRegion: ', data)
         },
         error => console.error(error)
@@ -79,8 +78,7 @@ export class BeaconsService extends CRUDService<Beacon> {
           console.log('didEnterRegion: ', data);
         }
       );
-      debugger
-      this.beaconRegion = this.ibeacon.BeaconRegion('deskBeacon', !this.all ? this.UUID : (window as any).cordova.plugins.locationManager.BeaconRegion.WILDCARD_UUID);
+      this.beaconRegion = this.ibeacon.BeaconRegion('deskBeacon', (window as any).cordova.plugins.locationManager.BeaconRegion.WILDCARD_UUID);
 
       this.ibeacon.startMonitoringForRegion(this.beaconRegion)
         .then(
@@ -100,14 +98,15 @@ export class BeaconsService extends CRUDService<Beacon> {
     await this.ibeacon.stopRangingBeaconsInRegion(this.beaconRegion);
   }
 
-  async toggleDetection() {
-    if (this.isMonitoring) {
-      this.isMonitoring = !this.isMonitoring;
-      return await this.stopDetect();
-    }
-    this.isMonitoring = !this.isMonitoring;
-    return await this.startDetect();
-  }
+  // async toggleDetection() {
+  //   debugger
+  //   if (this.isMonitoring) {
+  //     this.isMonitoring = !this.isMonitoring;
+  //     return await this.stopDetect();
+  //   }
+  //   this.isMonitoring = !this.isMonitoring;
+  //   return await this.startDetect();
+  // }
 
   calcPosition(beacons: Beacon[]) {
     return locate(beacons.filter(b => b.coordinate && b.coordinate.lat && b.coordinate.lng)

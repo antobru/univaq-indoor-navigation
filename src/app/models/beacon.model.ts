@@ -2,6 +2,7 @@ export class Beacon {
     public advertising?: ArrayBuffer;
     public parsed_advertising?: any;
     public id: string;
+    public uuid?: string;
     public name?: string;
     public rssi?: number;
     public distance?: number;

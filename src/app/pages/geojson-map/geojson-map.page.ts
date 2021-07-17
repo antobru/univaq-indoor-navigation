@@ -7,6 +7,8 @@ import { FloorsService } from '../../services/floors.service';
 import { Global } from '../../services/global';
 import { Area } from '../../models/area.model';
 import { AreasService } from '../../services/areas.service';
+import { PoisService } from 'src/app/services/pois.service';
+import { PointOfInterest } from 'src/app/models/point-of-interest.model';
 
 @Component({
   selector: 'app-geojson-map',
@@ -20,23 +22,34 @@ export class GeojsonMapPage implements OnInit {
   options: any;
   styles = mapStyle;
   currentPosition: { lat: number, lng: number };
+  showCurrentPosition: boolean = false;
 
   detectedBeacons: any[] = [];
+  allBeacons: any[] = [];
   beaconsMapping: Beacon[] = [];
   showBeacons: boolean = false;
   showMapping: boolean = false;
+  showAllbeacons: boolean = false;
 
   private _areas: Area[] = [];
   areas: Area[] = [];
 
+  private _pois: PointOfInterest[] = [];
+  pois: PointOfInterest[] = [];
+
   constructor(
-    private buildingsService: BuildingsService, private floorsService: FloorsService,
+    private buildingsService: BuildingsService,
+    private floorsService: FloorsService,
     public beaconsService: BeaconsService,
     public areasService: AreasService,
+    public poisService: PoisService,
     private ngZone: NgZone
   ) { }
 
-  async ngOnInit() {
+  ngOnInit() {
+  }
+
+  async ionViewWillEnter() {
     // this.map = JSON.parse(JSON.stringify(this._map));
     const building = await this.buildingsService.findOne(1);
     this.options = {
@@ -50,7 +63,8 @@ export class GeojsonMapPage implements OnInit {
     const floor = await this.floorsService.findOne(1);
     this._areas = floor.areas;
     this.areas = this._areas.filter((a: any) => a.active);
-    this.beaconsMapping = await this.beaconsService.find({});
+    this.beaconsMapping = await this.beaconsService.find({}, 0, 1000);
+    this.pois = await this.poisService.find({}, 0, 1000);
   }
 
   alertInfo(area: Area) {
@@ -73,7 +87,10 @@ export class GeojsonMapPage implements OnInit {
   }
 
   checkArea(position) {
-    if (!position) return;
+    if (!position) {
+      this.areas = [];
+      return;
+    }
     this.areas = this._areas.filter(a => this.isInside(position, a.paths));
   }
 
@@ -99,28 +116,34 @@ export class GeojsonMapPage implements OnInit {
   };
 
   async startDetection() {
-    this.beaconsService.all = !this.beaconsService.all;
+    // this.beaconsService.all = !this.beaconsService.all;
     const obs = await this.beaconsService.startDetect();
     obs.subscribe(res => {
-      this.ngZone.run(() => {
-        this.detectedBeacons = res.map(r => {
-          let beacon = this.detectedBeacons.find(b => b.id == r.id);
-          debugger
-          r.coordinate = beacon ? beacon.coordinate : null;
-          return r;
-        }).filter(b => b.coordinate);
-        if (this.detectedBeacons.length > 1) {
-          const position: any = this.beaconsService.calcPosition(res);
-          this.currentPosition = { lat: position.lat, lng: position.lng };
-          console.log()
-          this.checkArea(this.currentPosition);
-        }
-      })
+      this.allBeacons = res;
+      this.detectedBeacons = res.map(r => {
+        let beacon = this.beaconsMapping.find(b => b.uuid == r.id);
+        r.coordinate = beacon ? beacon.coordinate : null;
+        return r;
+      }).filter(b => b.coordinate);
+      if (this.detectedBeacons.length > 1) {
+        const position: any = this.beaconsService.calcPosition(res);
+        this.currentPosition = { lat: position.lat, lng: position.lng };
+        this.checkArea(this.currentPosition);
+      }
+      this.ngZone.run(() => { });
     });
   }
 
   async stopDetection() {
     await this.beaconsService.stopDetect();
+  }
+  async toggleDetection() {
+    if (this.beaconsService.isMonitoring) {
+      this.beaconsService.isMonitoring = !this.beaconsService.isMonitoring;
+      return await this.stopDetection();
+    }
+    this.beaconsService.isMonitoring = !this.beaconsService.isMonitoring;
+    return await this.startDetection();
   }
 
   toggleAreas() {

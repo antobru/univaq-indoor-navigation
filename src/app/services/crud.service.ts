@@ -9,13 +9,14 @@ export class CRUDService<T> {
 		this.endpoint = endpoint;
 	}
 
-	find(filter: any, start: number = 0, limit: number = 20, sort: string = null): Promise<T[]> {
+	find(filter: any, start: number = 0, limit: number = 20, sort: string = null, q: string = ''): Promise<T[]> {
 		let params: any = {};
 		let _where = '';
 		if (filter) _where = qs.stringify(filter);
 		if (start) params._start = "" + (start || 0);
 		if (limit) params._limit = "" + (limit || 20);
 		if (sort) params._sort = "" + (limit || 20);
+		if (q) params._q = q;
 
 		return this.http
 			.get<T[]>(`${this.endpoint}?${_where ? '_where=' + _where : ''}`, { params })

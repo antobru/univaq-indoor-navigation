@@ -7,18 +7,26 @@
       Opere d'arte
     </div>
     <div>
-      <ion-searchbar></ion-searchbar>
+      <ion-searchbar [(ngModel)]="term" [debounce]="400" (ngModelChange)="search()"></ion-searchbar>
     </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-list>
-    <ion-card button *ngFor="let artwork of artworks">
+    <ion-card button *ngFor="let artwork of pois">
       <ion-card-header>
-        <ion-card-title>{{artwork.title}}</ion-card-title>
-        <ion-card-subtitle></ion-card-subtitle>
+        <ion-card-title>{{artwork.name}}</ion-card-title>
       </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              Documenti: <b>{{(artwork.attachments || []).length}}</b>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
     </ion-card>
   </ion-list>
 </ion-content>
