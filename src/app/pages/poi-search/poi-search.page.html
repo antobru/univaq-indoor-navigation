@@ -1,0 +1,13 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Ricerca</ion-title>
+  </ion-toolbar>
+  <div>
+    <ion-searchbar animated="true" [debounce]="400" showCancelButton="focus" [(ngModel)]="poiSearch.searchTerm"
+      (ngModelChange)="poiSearch.search()"></ion-searchbar>
+  </div>
+</ion-header>
+
+<ion-content>
+  <poi-search #poiSearch [options]="{ showRecents: true, search: false }" (poiClick)="goToMap($event)"></poi-search>
+</ion-content>
