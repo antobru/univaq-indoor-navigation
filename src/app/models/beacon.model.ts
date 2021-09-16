@@ -1,18 +1,10 @@
-export class Beacon {
-    public advertising?: ArrayBuffer;
-    public parsed_advertising?: any;
-    public id: string;
-    public uuid?: string;
-    public name?: string;
-    public rssi?: number;
-    public distance?: number;
-    public tx?: number;
-    public data?: { url?: string, minor?: string, major?: string };
-    public coordinate: { lat: number, lng: number, z?: number };
+import { Area } from "./area.model";
+import { Coordinate } from "./coordinate";
 
-    constructor(beacon: Beacon) {
-        beacon.data = {};
-        Object.assign(this, beacon);
-        beacon.data = beacon.data || {};
-    }
+export class Beacon {
+    public id: any;
+    public uuid: string;
+    public note: string;
+    public coordinate: Coordinate;
+    public area: Area;
 }

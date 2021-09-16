@@ -9,8 +9,17 @@ import { FormsModule } from "@angular/forms";
 import { ArtworkDetailsComponent } from "./artwork-details/artwork-details.component";
 import { PinchZoomModule } from "ngx-pinch-zoom";
 import { AddArtworkInRouteComponent } from "./add-artwork-in-route/add-artwork-in-route.component";
+import { BeaconFormComponent } from "./beacon-form/beacon-form.component";
+import { PoiSearchComponent } from "./poi-search/poi-search.component";
 
-const components = [ArtworksCommandsComponent, MenuComponent, RoutessListComponent, ArtworksListComponent, ArtworkDetailsComponent, AddArtworkInRouteComponent];
+const components = [
+	ArtworksCommandsComponent, 
+	MenuComponent, 
+	RoutessListComponent, 
+	ArtworksListComponent, ArtworkDetailsComponent, AddArtworkInRouteComponent,
+	BeaconFormComponent,
+	PoiSearchComponent
+];
 
 @NgModule({
 	declarations: components,

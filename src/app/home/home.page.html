@@ -1,38 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-buttons>
-      <ion-button routerLink="/matterport-map">Map</ion-button>
-    </ion-buttons>
     <ion-title>
-      Blank
+      Nome APP
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  N° scan: {{n_scan}}
-
-  <ion-card *ngFor="let device of devices">
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="8">
-            {{device.name || 'unamed'}}<br>
-            <small>{{device.id}}</small><br>
-            <small><i>Url: </i>{{device.data.url}}</small> <br>
-            <hr>
-            <small><i> Advertising lenght: </i>{{device.advertising.byteLength}}</small> <br>
-          </ion-col>
-          <ion-col class="distance" size="4">
-            <div>
-              {{(device.distance || 0).toFixed(2)}}m
-              <small>RSSI: {{device.rssi}}</small>
-            </div>            
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-
-    </ion-card-content>
-  </ion-card>
-
 </ion-content>

@@ -26,3 +26,9 @@
     width: 100%;
     --padding-start: 0;
 }
+
+ion-toggle {
+    --handle-height: 15px;
+    --handle-width: 15px;
+    height: 20px;
+}

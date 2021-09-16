@@ -1,4 +1,4 @@
-import { Beacon } from "./beacon.model";
+import { Beacon } from "./beacon";
 import { Coordinate } from "./coordinate";
 
 export class Area {

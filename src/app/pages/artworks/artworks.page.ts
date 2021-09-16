@@ -3,6 +3,7 @@ import { ArtWork } from 'src/app/models/artwork.model';
 import { PointOfInterest } from 'src/app/models/point-of-interest.model';
 import { ArtworksService } from 'src/app/services/artworks.service';
 import { CacheDataService } from 'src/app/services/cache-data.service';
+import { Global } from 'src/app/services/global';
 import { PoisService } from 'src/app/services/pois.service';
 
 @Component({
@@ -23,11 +24,17 @@ export class ArtworksPage implements OnInit {
 
   async ionViewWillEnter() {
     // this.artworks = await this.cacheData.artworks;
-    this.pois = await this.poisService.find({},0, 1000);
+    let pois = await this.poisService.find({}, 0, 1000);
+    this.pois = pois.map(p => {
+      if (p.cover) {
+        p.cover.url = `${Global.ENDPOINTS.BASE}${p.cover.url}`;
+      }
+      return p;
+    });
   }
 
   async search() {
-    this.pois = await this.poisService.find({},0, 1000, null, this.term);
+    this.pois = await this.poisService.find({}, 0, 1000, null, this.term);
   }
 
 }

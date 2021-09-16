@@ -12,13 +12,17 @@
         <ion-label>Mostra Beacons</ion-label>
         <ion-toggle name="showBeacons" [(ngModel)]="showBeacons"></ion-toggle>
       </ion-item>
+      <ion-item style="zoom: 0.8">
+        <ion-label>Mostra Opere</ion-label>
+        <ion-toggle name="showPois" [(ngModel)]="showPois"></ion-toggle>
+      </ion-item>
       <ion-list-header>
         <ion-label>Mapped Beacons</ion-label>
       </ion-list-header>
       <ion-item *ngFor="let beacon of detectedBeacons">
         <ion-label>
-          <div>{{beacon.id}}</div>
-          <div><small> Distance: <i>{{beacon.distance}}</i></small></div>
+          <div><small>{{beacon.id}}</small></div>
+          <div><small> Distance: <i>{{beacon.distance}} - {{beacon.accuracy}}</i></small></div>
         </ion-label>
       </ion-item>
     </ion-list>
@@ -32,13 +36,33 @@
       <ng-container *ngIf="showAllbeacons">
         <ion-item *ngFor="let beacon of allBeacons">
           <ion-label>
-            <div>{{beacon.id}}</div>
+            <div><small>{{beacon.id}}</small></div>
             <div><small> Distance: <i>{{beacon.distance}}</i></small></div>
           </ion-label>
         </ion-item>
       </ng-container>
     </ion-list>
   </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <small>v1.0.4</small>
+    </ion-toolbar>
+  </ion-footer>
+</ion-menu>
+
+<ion-menu #favorites side="end" menuId="favorites" contentId="main">
+  <ion-content>
+    <ion-list>
+      <ion-list-header>
+        <ion-label>Favoriti</ion-label>
+      </ion-list-header>
+    </ion-list>
+  </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <small>v1.0.4</small>
+    </ion-toolbar>
+  </ion-footer>
 </ion-menu>
 
 <ion-header>
@@ -53,8 +77,14 @@
     </ion-buttons>
     <ion-title>geojson-map</ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="favorites.toggle()">
+        <ion-icon name="star" color="primary"></ion-icon>
+      </ion-button>
       <ion-button (click)="toggleDetection()">
         <ion-icon name="ear-outline" [color]="beaconsService.isMonitoring? 'success' : 'danger'"></ion-icon>
+      </ion-button>
+      <ion-button (click)="ionViewWillEnter()">
+        <ion-icon name="refresh-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -62,13 +92,27 @@
 
 <ion-content id="main">
   <div id="map">
-    <agm-map *ngIf="options" [latitude]="options.lat" [longitude]="options.lng" [zoom]="options.zoom"
+    <!-- <div class="ion-text-center ion-margin" style="display: flex; align-items: center;">
+      <div style="display: flex; margin: 0 auto;">
+        <div class="ion-margin-end">
+          <ion-icon name="map"></ion-icon>
+        </div>
+        <ion-toggle [(ngModel)]="view"></ion-toggle>
+        <div class="ion-margin-start">
+          <ion-icon name="star-outline"></ion-icon>
+        </div>
+      </div>
+    </div> -->
+    <agm-map #agmmap *ngIf="options" [latitude]="options.lat" [longitude]="options.lng" [zoom]="options.zoom"
       [minZoom]="options.minZoom" [maxZoom]="options.maxZoom" [disableDefaultUI]="true" [styles]="styles"
       (mapReady)="mapReadyHandler($event)">
+
+      <!-- GEOJSON FLOOR LAYER -->
       <agm-data-layer *ngIf="map" [geoJson]="map"></agm-data-layer>
-      <!-- <agm-marker [latitude]="options.lat" [longitude]="options.lng"></agm-marker> -->
+
+      <!-- BEACONS -->
       <ng-container *ngIf="showBeacons">
-        <agm-marker [latitude]="b.coordinate.lat" [longitude]="b.coordinate.lng" [iconUrl]="'assets/bluetooth.png'"
+        <agm-marker [latitude]="b.coordinate.lat" [longitude]="b.coordinate.lng" [iconUrl]="beaconIcon(b)"
           *ngFor="let b of beaconsMapping">
           <agm-info-window [disableAutoPan]="true">
             <div><b>id:</b> {{b.id}}</div>
@@ -76,22 +120,31 @@
             <div><b>Coords:</b> {{b.coordinate.lat}}, {{b.coordinate.lng}}</div>
           </agm-info-window>
         </agm-marker>
+
+        <!-- <agm-circle *ngFor="let b of detectedBeacons" [latitude]="b.coordinate.lat" [longitude]="b.coordinate.lng"
+          [radius]="b.distance"></agm-circle> -->
       </ng-container>
 
-      <agm-marker [latitude]="p.coordinate.lat" [longitude]="p.coordinate.lng"
-        [iconUrl]="'assets/point-of-interest.png'" *ngFor="let p of pois">
-        <agm-info-window [disableAutoPan]="true">
-          <div><b>id:</b> {{p.id}}</div>
-          <div><b>Name:</b> {{p.name}}</div>
-          <div><b>Coords:</b> {{p.coordinate.lat}}, {{p.coordinate.lng}}</div>
-          <div><b>meta:</b> {{p.metadata | json}}</div>
-        </agm-info-window>
-      </agm-marker>
+      <!-- POINT OF INTEREST -->
+      <ng-container *ngIf="showPois">
+        <agm-marker [id]="'poi-' + p.id" [latitude]="p.coordinate.lat" [longitude]="p.coordinate.lng"
+          [iconUrl]="'assets/point-of-interest.png'" *ngFor="let p of pois" (markerClick)="poiClick(p)">
+          <agm-info-window [disableAutoPan]="true" [isOpen]="currentInfoWindow == p.id"
+            (infoWindowClose)="currentInfoWindow = null">
+            <div><b>id:</b> {{p.id}}</div>
+            <div><b>Name:</b> {{p.name}}</div>
+            <div><b>Coords:</b> {{p.coordinate.lat}}, {{p.coordinate.lng}}</div>
+            <div><b>meta:</b> {{p.metadata | json}}</div>
+          </agm-info-window>
+        </agm-marker>
+      </ng-container>
 
+      <!-- USER POSITION -->
       <agm-marker *ngIf="currentPosition && showCurrentPosition" [latitude]="currentPosition.lat"
         [longitude]="currentPosition.lng" [iconUrl]="'assets/person.png'">
       </agm-marker>
 
+      <!-- FLOOR AREAS -->
       <agm-polygon [paths]="a.paths" [fillColor]="a.fill" *ngFor="let a of areas" (polyClick)="alertInfo(a)">
       </agm-polygon>
     </agm-map>

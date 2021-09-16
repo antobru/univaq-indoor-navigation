@@ -1,6 +1,6 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import mapStyle from '../../../assets/map-style.json';
-import { Beacon } from '../../models/beacon.model';
+import { Beacon } from '../../models/beacon';
 import { BeaconsService } from '../../services/beacons.service';
 import { BuildingsService } from '../../services/buildings.service';
 import { FloorsService } from '../../services/floors.service';
@@ -9,6 +9,10 @@ import { Area } from '../../models/area.model';
 import { AreasService } from '../../services/areas.service';
 import { PoisService } from 'src/app/services/pois.service';
 import { PointOfInterest } from 'src/app/models/point-of-interest.model';
+import { ActionSheetController, ModalController } from '@ionic/angular';
+import { BeaconFormComponent } from 'src/app/components/beacon-form/beacon-form.component';
+import { Coordinate } from 'src/app/models/coordinate';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-geojson-map',
@@ -34,8 +38,10 @@ export class GeojsonMapPage implements OnInit {
   private _areas: Area[] = [];
   areas: Area[] = [];
 
-  private _pois: PointOfInterest[] = [];
   pois: PointOfInterest[] = [];
+  showPois: boolean = true;
+  view: boolean;
+  currentInfoWindow: any;
 
   constructor(
     private buildingsService: BuildingsService,
@@ -43,7 +49,10 @@ export class GeojsonMapPage implements OnInit {
     public beaconsService: BeaconsService,
     public areasService: AreasService,
     public poisService: PoisService,
-    private ngZone: NgZone
+    public modalCtrl: ModalController,
+    public actionSheetCtrl: ActionSheetController,
+    private ngZone: NgZone,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
@@ -51,11 +60,12 @@ export class GeojsonMapPage implements OnInit {
 
   async ionViewWillEnter() {
     // this.map = JSON.parse(JSON.stringify(this._map));
+    const params = this.route.snapshot.params;
     const building = await this.buildingsService.findOne(1);
     this.options = {
-      lat: building.center.lat,
-      lng: building.center.lng,
-      zoom: building.zoom,
+      lat: parseFloat(params.lat || building.center.lat),
+      lng: parseFloat(params.lng || building.center.lng),
+      zoom: parseFloat(params.zoom || building.zoom),
       minZoom: building.minZoom,
       maxZoom: building.maxZoom
     }
@@ -65,6 +75,13 @@ export class GeojsonMapPage implements OnInit {
     this.areas = this._areas.filter((a: any) => a.active);
     this.beaconsMapping = await this.beaconsService.find({}, 0, 1000);
     this.pois = await this.poisService.find({}, 0, 1000);
+
+    if (params.poi_id) {
+      const poi = this.pois.find(p => p.id == params.poi_id);
+      setTimeout(() => {
+        this.poiClick(poi);
+      }, 300)
+    }
   }
 
   alertInfo(area: Area) {
@@ -76,6 +93,7 @@ export class GeojsonMapPage implements OnInit {
       this.ngZone.run(() => {
         const coords = { lat: e.latLng.lat(), lng: e.latLng.lng() };
         console.log(JSON.stringify(coords));
+        this.openOptions(coords);
       });
     });
   }
@@ -118,17 +136,22 @@ export class GeojsonMapPage implements OnInit {
   async startDetection() {
     // this.beaconsService.all = !this.beaconsService.all;
     const obs = await this.beaconsService.startDetect();
-    obs.subscribe(res => {
-      this.allBeacons = res;
-      this.detectedBeacons = res.map(r => {
+    obs.subscribe(detectedBeacons => {
+      this.allBeacons = detectedBeacons;
+      this.detectedBeacons = detectedBeacons.map(r => {
         let beacon = this.beaconsMapping.find(b => b.uuid == r.id);
         r.coordinate = beacon ? beacon.coordinate : null;
         return r;
-      }).filter(b => b.coordinate);
-      if (this.detectedBeacons.length > 1) {
-        const position: any = this.beaconsService.calcPosition(res);
-        this.currentPosition = { lat: position.lat, lng: position.lng };
-        this.checkArea(this.currentPosition);
+      }).filter(b => b.coordinate).sort((a, b) => a.distance - b.distance);
+      if (this.detectedBeacons.length > 2) {
+        // detectedBeacons = detectedBeacons.sort((a, b) => a.distance - b.distance).slice(0, 3);
+        try {
+          const position: any = this.beaconsService.calcPosition(detectedBeacons);
+          this.currentPosition = { lat: position.lat, lng: position.lng };
+          this.checkArea(this.currentPosition);
+        } catch (error) {
+          console.log(error);
+        }
       }
       this.ngZone.run(() => { });
     });
@@ -159,4 +182,43 @@ export class GeojsonMapPage implements OnInit {
 
   }
 
+  async openOptions(coordinate: Coordinate) {
+    const actionSheet = await this.actionSheetCtrl.create({
+      buttons: [
+        { text: 'Aggiungi beacon', handler: () => { this.mapBeacon(coordinate) } }
+      ]
+    });
+    actionSheet.present();
+  }
+
+  async mapBeacon(coordinate: Coordinate) {
+    const modal = await this.modalCtrl.create({
+      component: BeaconFormComponent,
+      componentProps: { coordinate }
+    });
+    modal.present();
+    modal.onDidDismiss().then(async res => {
+      if (res.data) {
+        await this.beaconsService.create(res.data);
+        this.beaconsMapping = await this.beaconsService.find({}, 0, 1000);
+      }
+    })
+  }
+
+  beaconIcon(beacon) {
+    return this.detectedBeacons.find(db => db.id == beacon.uuid) ? 'assets/bluetooth-active.png' : 'assets/bluetooth.png'
+  }
+
+  goFavorites() {
+
+  }
+
+  poiClick(poi: PointOfInterest) {
+    this.currentInfoWindow = null;
+    this.options.lat = poi.coordinate.lat;
+    this.options.lng = poi.coordinate.lng;
+    setTimeout(() => {
+      this.currentInfoWindow = poi.id;
+    }, 300)
+  }
 }

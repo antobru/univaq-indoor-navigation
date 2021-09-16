@@ -1,11 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BeaconRegion, IBeacon, Beacon as iBeacon } from '@ionic-native/ibeacon/ngx';
+import { Platform } from '@ionic/angular';
 import locate from 'multilateration';
 import { Observable } from 'rxjs';
-import { Beacon } from '../models/beacon.model';
+import { Beacon } from '../models/beacon';
 import { CRUDService } from './crud.service';
 import { Global } from './global';
+
+const N = 1;
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +20,7 @@ export class BeaconsService extends CRUDService<Beacon> {
   beaconRegion: BeaconRegion;
   isMonitoring: boolean = false;
 
-  constructor(private ibeacon: IBeacon, protected http: HttpClient) {
+  constructor(private ibeacon: IBeacon, protected http: HttpClient, private platform: Platform) {
     super(http, `${Global.ENDPOINTS.BASE}/beacons`);
   }
 
@@ -59,7 +62,8 @@ export class BeaconsService extends CRUDService<Beacon> {
           const beacons = data.beacons;
           observer.next(beacons.map(b => ({
             id: b.uuid,
-            distance: b.accuracy,
+            accuracy: b.accuracy,
+            distance: this.errorCorrection(b.accuracy, b.tx, b.rssi),
             rssi: b.rssi,
             tx: b.tx,
             coordinate: { lat: 0, lng: 0 }
@@ -98,16 +102,6 @@ export class BeaconsService extends CRUDService<Beacon> {
     await this.ibeacon.stopRangingBeaconsInRegion(this.beaconRegion);
   }
 
-  // async toggleDetection() {
-  //   debugger
-  //   if (this.isMonitoring) {
-  //     this.isMonitoring = !this.isMonitoring;
-  //     return await this.stopDetect();
-  //   }
-  //   this.isMonitoring = !this.isMonitoring;
-  //   return await this.startDetect();
-  // }
-
   calcPosition(beacons: Beacon[]) {
     return locate(beacons.filter(b => b.coordinate && b.coordinate.lat && b.coordinate.lng)
       .map(b => ({
@@ -115,6 +109,22 @@ export class BeaconsService extends CRUDService<Beacon> {
         lat: b.coordinate.lat,
         lng: b.coordinate.lng,
         z: b.coordinate.z
-      })), { geometry: 'earth' });
+      })), { geometry: 'earth', method: 'lseInside' });
+  }
+
+  private errorCorrection(distance: number, tx: number, rssi: number) {
+    return distance;
+    // if (rssi == 0) {
+    //   return -1.0; // if we cannot determine distance, return -1.
+    // }
+
+    // const ratio = rssi * 1.0 / tx;
+    // if (ratio < 1.0) {
+    //   return Math.pow(ratio, 10);
+    // }
+    // else {
+    //   const accuracy = (0.89976) * Math.pow(ratio, 7.7095) + 0.111;
+    //   return accuracy;
+    // }
   }
 }

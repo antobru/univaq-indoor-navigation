@@ -14,15 +14,17 @@
 
 <ion-content>
   <ion-list>
-    <ion-card button *ngFor="let artwork of pois">
-      <ion-card-header>
-        <ion-card-title>{{artwork.name}}</ion-card-title>
-      </ion-card-header>
+    <ion-card class="poi" button *ngFor="let poi of pois">
       <ion-card-content>
         <ion-grid>
           <ion-row>
-            <ion-col>
-              Documenti: <b>{{(artwork.attachments || []).length}}</b>
+            <ion-col size="4" class="poi-img" [ngStyle]="{'background-image': 'url('+poi.cover?.url+')'}">
+            </ion-col>
+            <ion-col size="8">
+              <div>
+                <b>{{poi.name}}</b>
+              </div>
+              <small>Documenti: {{(poi.attachments || []).length}}</small>
             </ion-col>
           </ion-row>
         </ion-grid>

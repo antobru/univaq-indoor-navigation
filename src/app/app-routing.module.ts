@@ -8,7 +8,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'geojson-map',
+    redirectTo: 'poi-search',
     pathMatch: 'full'
   },
   {
@@ -23,6 +23,19 @@ const routes: Routes = [
     path: 'geojson-map',
     loadChildren: () => import('./pages/geojson-map/geojson-map.module').then( m => m.GeojsonMapPageModule)
   },
+  {
+    path: 'geojson-map/:lat/:lng/:zoom',
+    loadChildren: () => import('./pages/geojson-map/geojson-map.module').then( m => m.GeojsonMapPageModule)
+  },
+  {
+    path: 'geojson-map/:poi_id',
+    loadChildren: () => import('./pages/geojson-map/geojson-map.module').then( m => m.GeojsonMapPageModule)
+  },
+  {
+    path: 'poi-search',
+    loadChildren: () => import('./pages/poi-search/poi-search.module').then( m => m.PoiSearchPageModule)
+  },
+
 
 
 ];
